@@ -19,12 +19,12 @@ const darkTheme = createTheme({
 
 function App() {
 
-  const [ login, setLogin ] = useState({login: false, register: false, guestMode: false});
+  const [ login, setLogin ] = useState({login: true, register: false, guestMode: false});
   const [data, setData] = useState({log: '', pass: ''});
 
   return (
     <div className="App">
-      {login.check ? <header className="App-header">
+      {login.login ? <header className="App-header">
         <Menu />
       </header> : null}
       <ThemeProvider theme={darkTheme}>

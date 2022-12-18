@@ -12,7 +12,7 @@ import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 
-export default function AccountMenu() {
+export default function AccountMenu(loginData) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -60,7 +60,7 @@ export default function AccountMenu() {
               display: 'block',
               position: 'absolute',
               top: 0,
-              right: 14,
+              right: '87%',
               width: 10,
               height: 10,
               bgcolor: 'background.paper',
@@ -70,32 +70,32 @@ export default function AccountMenu() {
           },
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
         <MenuItem>
-          <Avatar /> Profile
+          <Avatar /> Профиль
         </MenuItem>
         <MenuItem>
-          <Avatar /> My account
+          <Avatar /> Аккаунт
         </MenuItem>
         <Divider />
         <MenuItem>
           <ListItemIcon>
             <PersonAdd fontSize="small" />
           </ListItemIcon>
-          Add another account
+          Добавить друга
         </MenuItem>
         <MenuItem>
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>
-          Settings
+          Настройки
         </MenuItem>
         <MenuItem>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>
-          Logout
+          Выход
         </MenuItem>
       </Menu>
     </React.Fragment>
