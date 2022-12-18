@@ -1,0 +1,79 @@
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import { blue, blueGrey, green } from '@mui/material/colors';
+import React, { useState } from 'react';
+
+export default function AccountMenu({ setLogin, data, setData }) {
+
+    const [errState, setErrState] = useState({log: false, pass: false});
+    const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
+
+    const handleSubmit = async (evt) => {
+        evt.preventDefault();
+        let eee = {...errState};
+        if (data.log==='') eee.log=true;
+        if (data.pass==='') eee.pass=true;
+        setErrState(eee);
+        //console.log(evt.target.value)
+        //if (evt) console.log(evt);
+    }
+
+    const regButton = async (evt) => {
+        console.log('reg')
+        evt.preventDefault();
+        setLogin({login: false, register: true, guestMode: false})
+    }
+
+    const unLoginMode = async (evt) => {
+        evt.preventDefault();
+        setLogin({login: false, register: false, guestMode: true})
+    }
+
+  return (
+    <Box
+        component="form"
+        onSubmit={(event)=>handleSubmit(event)}
+        sx={{
+            borderRadius: '50px',
+            boxShadow: 3,
+            backgroundColor: blueGrey[900],
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '50%',
+            minWidth: '250px',
+            margin: '100px',
+            padding: '20px'
+        }}
+        validate
+        autoComplete="off"
+        >
+        <TextField 
+            required 
+            sx={{ margin: '10px', boxShadow: 3 }}
+            error={errState.log} 
+            name='login' 
+            label={label.log} 
+            value={data.log} 
+            variant="outlined" 
+            onChange={({ target }) => {
+                const resObj = { ...data };
+                resObj.log = target.value;
+                setData(resObj)
+        }} />
+        <TextField required sx={{ margin: '10px', boxShadow: 3 }} error={errState.pass} name='password' label={label.pass} value={data.pass} variant="outlined"
+            onChange={({ target }) => {
+                const resObj = { ...data };
+                resObj.pass = target.value;
+                setData(resObj)
+        }} />
+        <Box>
+            <Button type="submit" sx={{ backgroundColor: blue[800], boxShadow: 3, margin: 1 }} variant="contained">Вход</Button>
+            <Button sx={{ backgroundColor: green[400], boxShadow: 3, margin: 1 }} onClick = {(event)=>regButton(event)} variant="contained">Регистрация</Button> 
+        </Box>
+        <Button sx={{ backgroundColor: blue[100], boxShadow: 3, margin: 1 }} onClick = {(event)=>unLoginMode(event)} variant="contained">Продолжить без регистрации </Button>
+    </Box>
+  );
+}
