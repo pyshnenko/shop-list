@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
 import React, { useState } from 'react';
 
-export default function AccountMenu({ setLogin, data, setData }) {
+export default function AccountMenu({ setState, data, setData, setUser }) {
 
     const [errState, setErrState] = useState({log: false, pass: false});
     const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
@@ -15,19 +15,22 @@ export default function AccountMenu({ setLogin, data, setData }) {
         if (data.log==='') eee.log=true;
         if (data.pass==='') eee.pass=true;
         setErrState(eee);
-        //console.log(evt.target.value)
-        //if (evt) console.log(evt);
+    }
+
+    const loginButton = async (evt) => {
+        evt.preventDefault();
+        setUser({login: data.log, key: '123', token: '321', role: 'user', name: 'name', last_name: 'lname', first_name: 'fname', email: 'email'})
+        setState({login: true, state: 'centralPage'});
     }
 
     const regButton = async (evt) => {
-        console.log('reg')
         evt.preventDefault();
-        setLogin({login: false, register: true, guestMode: false})
+        setState({login: false, state: 'register'})
     }
 
     const unLoginMode = async (evt) => {
         evt.preventDefault();
-        setLogin({login: false, register: false, guestMode: true})
+        setState({login: false, state: 'unLogin'})
     }
 
   return (
@@ -63,14 +66,14 @@ export default function AccountMenu({ setLogin, data, setData }) {
                 resObj.log = target.value;
                 setData(resObj)
         }} />
-        <TextField required sx={{ margin: '10px', boxShadow: 3 }} error={errState.pass} name='password' label={label.pass} value={data.pass} variant="outlined"
+        <TextField required sx={{ margin: '10px', boxShadow: 3 }} error={errState.pass} type="password" name='password' label={label.pass} value={data.pass} variant="outlined"
             onChange={({ target }) => {
                 const resObj = { ...data };
                 resObj.pass = target.value;
                 setData(resObj)
         }} />
         <Box>
-            <Button type="submit" sx={{ backgroundColor: blue[800], boxShadow: 3, margin: 1 }} variant="contained">Вход</Button>
+            <Button type="submit" sx={{ backgroundColor: blue[800], boxShadow: 3, margin: 1 }} onClick = {(event)=>loginButton(event)} variant="contained">Вход</Button>
             <Button sx={{ backgroundColor: green[400], boxShadow: 3, margin: 1 }} onClick = {(event)=>regButton(event)} variant="contained">Регистрация</Button> 
         </Box>
         <Button sx={{ backgroundColor: blue[100], boxShadow: 3, margin: 1 }} onClick = {(event)=>unLoginMode(event)} variant="contained">Продолжить без регистрации </Button>

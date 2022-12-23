@@ -31,12 +31,12 @@ const steps = [
     },
   ];
 
-export default function Registration({ data, setData }) {
+export default function Registration({ data, setData, state, setState, user, setUser, api }) {
     const windowInnerWidth = window.innerWidth;
     const windowInnerHeight = window.innerHeight;
     const horiz = windowInnerWidth/windowInnerHeight>1;
 
-    let [activeStep, setActiveStep] = React.useState(0);
+    let [ activeStep, setActiveStep ] = React.useState(0);
     let [ checkPass, setCheckPass ] = useState({first: '', seckond: '', error: false, errorL: false, errorE: false})
     let [ otherData, setOtherData ] = useState({name: '', lastName: '', seckondName: '', email: ''});
     let [ open, setOpen ] = useState({succes: false, error: false, time: 5000, text: ''});
@@ -175,15 +175,19 @@ export default function Registration({ data, setData }) {
                 let dat = {...checkPass};
                 dat.errorE=false;
                 setOtherData(dat)
-                setActiveStep((prevActiveStep) => prevActiveStep + 1);
                 setOpen({succes: true, error: false, time: 5000, text: 'Успех'})
+                setUser({login: data.log, key: '123', token: '321', role: 'user', name: otherData.name, last_name: otherData.lastName, first_name: otherData.lastName, email: otherData.email})
+                setState({login: true, state: 'centralPage'});
+                setData({log: '', pass: ''});
+                setActiveStep(0)
             }
         }
         else setActiveStep((prevActiveStep) => prevActiveStep + 1);
     };
 
     const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+        if (activeStep===0) setState({login: false, state: ''});
+        else setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const handleReset = () => {
@@ -239,7 +243,6 @@ export default function Registration({ data, setData }) {
                                         {index === steps.length - 1 ? 'Зарегистрироваться' : 'Далее'}
                                     </Button>
                                     <Button
-                                        disabled={index === 0}
                                         onClick={handleBack}
                                         sx={{ mt: 1, mr: 1 }}
                                     >
@@ -263,21 +266,12 @@ export default function Registration({ data, setData }) {
                                 {activeStep === steps.length - 1 ? 'Зарегистрироваться' : 'Далее'}
                             </Button>
                             <Button
-                                disabled={activeStep === 0}
                                 onClick={handleBack}
                                 sx={{ mt: 1, mr: 1 }}
                             >
                                 Назад
                             </Button>
                         </div> : null}
-                    {activeStep === steps.length && (
-                        <Paper square elevation={0} sx={{ p: 3, backgroundColor: blueGrey[900] }}>
-                        <Typography>Допустим, отправилось</Typography>
-                        <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-                            Начать с начала
-                        </Button>
-                        </Paper>
-                    )}
                 </Box>
             </Box>
         </div>

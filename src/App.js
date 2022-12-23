@@ -2,7 +2,9 @@
 import './App.css';
 import Menu from './helpers/menu';
 import Login from './pages/Login';
+import UnLogin from './pages/UnLogin';
 import Registation from './pages/Register';
+import CPage from './pages/CPage';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
 import React, { useState, useContext } from 'react';
@@ -19,14 +21,15 @@ const darkTheme = createTheme({
 
 function App() {
 
-  const [ login, setLogin ] = useState({login: true, register: false, guestMode: false});
-  const [data, setData] = useState({log: '', pass: ''});
+  const [ state, setState ] = useState({login: false, state: ''});
+  const [ data, setData ] = useState({log: '', pass: ''});
+  const [ user, setUser ] = useState({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
 
   return (
     <div className="App">
-      {login.login ? <header className="App-header">
-        <Menu />
-      </header> : null}
+      {state.login&&<header className="App-header">
+        <Menu user={user} setUser={setUser} state={state} setState={setState}/>
+      </header>}
       <ThemeProvider theme={darkTheme}>
       <CssBaseline />
         <div className="workDiv" style={{ 
@@ -37,8 +40,10 @@ function App() {
             width: '100vw',
             height: '100vh'
           }}>
-          { !login.login ? !login.register ? !login.guestMode ? <Login setLogin = { setLogin } data = {data} setData={setData} /> 
-            : null : <Registation data = {data} setData={setData} /> : null }
+          {(!state.login)&&(state.state==='')&&<Login data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+          {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+          {(!state.login)&&(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+          {(state.login)&&(state.state==='centralPage')&&<CPage data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
         </div>
       </ThemeProvider>
     </div>

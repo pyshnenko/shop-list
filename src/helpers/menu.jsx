@@ -6,13 +6,13 @@ import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
+import Typography from '@mui/material/Typography';
 
-export default function AccountMenu(loginData) {
+export default function AccountMenu({ user, setUser, state, setState }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -21,9 +21,16 @@ export default function AccountMenu(loginData) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+  const handleMenuClick = (evt, ind) => {
+    console.log(ind);
+    if (ind==='exit') {
+      setUser({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
+      setState({login: false, state: ''})
+    }
+  };
   return (
     <React.Fragment>
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
         <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}
@@ -36,6 +43,7 @@ export default function AccountMenu(loginData) {
             <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
           </IconButton>
         </Tooltip>
+        <Typography sx={{ minWidth: 100 }}>{user.login}</Typography>
       </Box>
       <Menu
         anchorEl={anchorEl}
@@ -72,26 +80,26 @@ export default function AccountMenu(loginData) {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        <MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event, 'profile')}}>
           <Avatar /> Профиль
         </MenuItem>
-        <MenuItem>
-          <Avatar /> Аккаунт
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'lists')}}>
+          <Avatar /> Мои списки
         </MenuItem>
         <Divider />
-        <MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'addfriend')}}>
           <ListItemIcon>
             <PersonAdd fontSize="small" />
           </ListItemIcon>
           Добавить друга
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'settings')}}>
           <ListItemIcon>
             <Settings fontSize="small" />
           </ListItemIcon>
           Настройки
         </MenuItem>
-        <MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'exit')}}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

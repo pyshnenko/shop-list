@@ -18,17 +18,66 @@ export default class sendApi {
     }
 
     async sendPost(obj) {
-        let response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8' || obj.headers.contentType,//application/x-www-form-urlencoded',
-              'make': '' || obj.headers.make,
-              'autorization': '' || `Brearer ${obj.headers.token}`
-            },
-            body: obj.body//user//
-        });
-          
-        let result = await response.json();
+        console.log('post')
+        try {
+            let response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json; charset=utf-8' || obj.headers.contentType,//application/x-www-form-urlencoded',
+                'make': '' || obj.headers.make,
+                'autorization': '' || `Brearer ${obj.headers.token}`
+                },
+                body: obj.body//user//
+            });
+            
+            let result = await response.json();
+            console.log(result)
+            //setRows(result);
+            return result;
+        }
+        catch(e) {
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            console.log('nop');
+            return ([{
+                name: 'list 1', author: 'nop', data: [
+                { name: 'Cupcake', total: 3, del: 0, selected: false },
+                { name: 'Donut', total: 2, del: 0, selected: false },
+                { name: 'Eclair', total: 3, del: 0, selected: false },
+                { name: 'Frozen yoghurt', total: 4, del: 0, selected: false },
+                { name: 'Gingerbread', total: 1, del: 0, selected: false },
+                { name: 'Honeycomb', total: 2, del: 0, selected: false },
+                { name: 'Ice cream sandwich', total: 237, del: 0, selected: false },
+                { name: 'Jelly Bean', total: 3, del: 0, selected: false },
+                { name: 'KitKat', total: 6, del: 0, selected: false },
+                { name: 'Lollipop', total: 3, del: 0, selected: false },
+                { name: 'Marshmallow', total: 4, del: 0, selected: false },
+                { name: 'Nougat', total: 1, del: 0, selected: false },
+                { name: 'Oreo', total: 2, del: 0, selected: false },
+              ]}, {
+                name: 'Список 2', author: 'nop', data: [
+                { name: 'Блины', total: 3, del: 0, selected: false },
+                { name: 'Пончики', total: 2, del: 0, selected: false },
+                { name: 'Эклер', total: 3, del: 0, selected: false },
+                { name: 'йогурт', total: 4, del: 0, selected: false },
+                { name: 'хлеб', total: 1, del: 0, selected: false },
+                { name: 'мед', total: 2, del: 0, selected: false },
+                { name: 'мороженое', total: 237, del: 0, selected: false },
+                { name: 'сладкое', total: 3, del: 0, selected: false },
+                { name: 'киткат', total: 6, del: 0, selected: false },
+                { name: 'андроид', total: 3, del: 0, selected: false },
+                { name: 'зефир', total: 4, del: 0, selected: false },
+                { name: 'нуга', total: 1, del: 0, selected: false },
+                { name: 'орео', total: 2, del: 0, selected: false },
+              ]}])
+        }
     }
 
     async sendDelete(obj) {
