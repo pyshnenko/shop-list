@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
 import React, { useState } from 'react';
 
-export default function AccountMenu({ setState, data, setData, setUser }) {
+export default function AccountMenu({ setState, data, setData, setUser, api }) {
 
     const [errState, setErrState] = useState({log: false, pass: false});
     const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
@@ -18,9 +18,17 @@ export default function AccountMenu({ setState, data, setData, setUser }) {
     }
 
     const loginButton = async (evt) => {
+        console.log('aaaaaaa')
         evt.preventDefault();
-        setUser({login: data.log, key: '123', token: '321', role: 'user', name: 'name', last_name: 'lname', first_name: 'fname', email: 'email'})
-        setState({login: true, state: 'centralPage'});
+        let answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '');
+        if (answ.data.data[0].hasOwnProperty('err')) console.log('error');
+        else {
+            console.log(answ.data.data[0])
+            let rdata=answ.data.data[0]
+            setUser({login: rdata.login, token: rdata.token, role: rdata.role, name: rdata.name, last_name: rdata.last_name, first_name: rdata.first_name, email: rdata.email, emailValid: rdata.emailValid})
+            setState({login: true, state: 'centralPage'});
+            setLabel({log: 'Логин', pass: 'Пароль'});
+        }
     }
 
     const regButton = async (evt) => {

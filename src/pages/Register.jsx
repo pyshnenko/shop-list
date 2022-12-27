@@ -5,9 +5,9 @@ import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import StepContent from '@mui/material/StepContent';
 import Button from '@mui/material/Button';
-import Paper from '@mui/material/Paper';
+//import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { red, blueGrey, green } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import TextField from '@mui/material/TextField';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
@@ -101,7 +101,7 @@ export default function Registration({ data, setData, state, setState, user, set
         else if (ind === 3) return (
             <TextField required sx={{ margin: '10px', boxShadow: 3 }} label="e-mail" value={otherData.email} variant="outlined"
                 onChange={({ target }) => {
-                    let resObj = { ...data };
+                    let resObj = { ...otherData };
                     resObj.email = target.value;
                     setOtherData(resObj)
                     if (checkPass.errorE) {
@@ -121,7 +121,7 @@ export default function Registration({ data, setData, state, setState, user, set
         setOpen({succes: false, error: false, time: 5000, text: ''});
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
         console.log(activeStep);
         console.log(steps.length);
         if (activeStep===0) {
@@ -173,10 +173,19 @@ export default function Registration({ data, setData, state, setState, user, set
             }
             else {
                 let dat = {...checkPass};
+                console.log(otherData)
+                console.log(await api.sendPost({ 
+                    login: data.log, 
+                    pass: data.pass, 
+                    first_name: otherData.lastName, 
+                    last_name: otherData.seckondName, 
+                    name: otherData.name, 
+                    email: otherData.email 
+                }, 'reg', '' ))
                 dat.errorE=false;
-                setOtherData(dat)
+                setCheckPass(dat)
                 setOpen({succes: true, error: false, time: 5000, text: 'Успех'})
-                setUser({login: data.log, key: '123', token: '321', role: 'user', name: otherData.name, last_name: otherData.lastName, first_name: otherData.lastName, email: otherData.email})
+                setUser({login: data.log, key: '123', token: '321', role: 'user', name: otherData.name, last_name: otherData.lastName, first_name: otherData.seckondName, email: otherData.email})
                 setState({login: true, state: 'centralPage'});
                 setData({log: '', pass: ''});
                 setActiveStep(0)
@@ -190,9 +199,9 @@ export default function Registration({ data, setData, state, setState, user, set
         else setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const handleReset = () => {
+    /*const handleReset = () => {
         setActiveStep(0);
-    };
+    };*/
     return (
         <div>
             <Snackbar open={open.error} autoHideDuration={open.time} onClose={handleClose}>

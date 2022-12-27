@@ -1,4 +1,6 @@
+import axios from "axios";
 let url;
+const baseURL = "http://45.89.66.91:8765/api";
 
 export default class sendApi {
     constructor(uri) {
@@ -17,35 +19,50 @@ export default class sendApi {
         return await response.json();
     }
 
-    async sendPost(obj) {
-        console.log('post')
+    async sendPost(obj, make, token) {
+        console.log('post');
+        console.log(obj)
         try {
-            let response = await fetch(url, {
+            /*let response = await fetch(url, {
                 method: 'POST',
+                mode: 'no-cors',//'no-cors',
                 headers: {
-                'Content-Type': 'application/json; charset=utf-8' || obj.headers.contentType,//application/x-www-form-urlencoded',
+                'Content-Type': 'application/json' || obj.headers.contentType,//application/x-www-form-urlencoded',//'application/json; charset=utf-8'
                 'make': '' || obj.headers.make,
                 'autorization': '' || `Brearer ${obj.headers.token}`
                 },
-                body: obj.body//user//
+                body: JSON.stringify({
+                    login: obj.body.login, 
+                    pass: obj.body.pass, 
+                    first_name: obj.body.first_name, 
+                    last_name: obj.body.last_name,
+                    email: obj.body.email,
+                    lists: obj.body.lists,
+                    data: obj.body.data,
+                    name: obj.body.name
+                })//JSON.stringify(obj.body)//user//
             });
             
-            let result = await response.json();
-            console.log(result)
+            let result = await response.text();
+            console.log(result)*/
             //setRows(result);
-            return result;
+            const jsonHeader = {
+                "Content-type": "application/json",
+                "make": make,
+                "authorization": '' || token
+            };
+    
+            let send = axios.create({
+                baseURL,
+                headers: jsonHeader
+            });
+            const res = await send.post(baseURL, obj);
+            console.log(res); 
+            return res;
         }
         catch(e) {
             console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
-            console.log('nop');
+            console.log(e)
             return ([{
                 name: 'list 1', author: 'nop', data: [
                 { name: 'Cupcake', total: 3, del: 0, selected: false },

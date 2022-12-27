@@ -10,7 +10,7 @@ import SpeedDialAction from '@mui/material/SpeedDialAction';
 import SaveIcon from '@mui/icons-material/Save';
 import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
 //import { blueGrey, green } from '@mui/material/colors';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -27,6 +27,14 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import block from './../mech/apiTimer';
+import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
 
 const headCells = [
   {
@@ -81,40 +89,55 @@ const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
   },
 }));
 
-const actions = [
-  { icon: <SaveIcon />, name: 'Сохранить' },
-  { icon: <ModeEditOutlineOutlinedIcon />, name: 'Редактировать' },
-  { icon: <SpeedDialIcon />, name: 'Создать' },
-];
-let aaa = true;
+export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
 
-const resultApi = async (api) => {
-  return await api.sendPost({ headers: {token: 'token', make: 'listsList'}})
-}
-export default function PlaygroundSpeedDial({ api, user }) {
-
-  const [ answer, setAnswer ] = useState()
-  const [ page, setPage ] = React.useState(0);
-  const [ rowsPerPage, setRowsPerPage ] = React.useState(5);
-  const [newRow, setNewRow] = React.useState({ name: '', total: '' });
+  const [ page, setPage ] = useState(0);
+  const [ rowsPerPage, setRowsPerPage ] = useState(5);
+  const [newRow, setNewRow] = useState({ name: '', total: '' });
   const [ rows, setRows ] = useState([]);
-  if (aaa) {
-    //setRows(resultApi(api));
-    console.log(rows)
-    aaa=false;
-  }
+  const [open, setOpen] = useState({list: 0, visible: false, text: ''});
+  const [opent, setOpent] = useState('');
+  const [width, setWidth] = useState(window.innerWidth);
+
+  const [height, setHeight] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const handleResize = (event) => {
+      setWidth(event.target.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = (event) => {
+      setHeight(event.target.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect( () => {    
     console.log("useEffect");
     const fetchData = async () => {
-      const result = await api.sendPost({ headers: {token: 'token', make: 'listsList'}});
-      console.log(result);
-      setRows(result);
+      const result = await api.sendPost({}, 'lists', `Bearer ${user.token}`);
+      console.log(result.data.lists);
+      if (typeof(result.data.lists)==='string') setRows([]);
+      else setRows(result.data.lists);
     }
-    fetchData()
-    //setRows(fetchData())
+    if (block()) fetchData()
   },
   []);
+
+  const actions = [
+    { icon: <SaveIcon />, name: 'Сохранить', mode: 'save' },
+    { icon: mode.edit ? <ModeEditOutlineOutlinedIcon /> : <EditOffOutlinedIcon />, name: 'Редактировать', mode: mode.edit ? 'edit' : 'notedit' },
+    { icon: <SpeedDialIcon />, name: 'Создать', mode: 'create' },
+  ];
 
   const handleClick = (event, list, index) => {
     const rIndex = index + (page * rowsPerPage);
@@ -156,25 +179,91 @@ export default function PlaygroundSpeedDial({ api, user }) {
     }
   }
 
+  const handleListEdit = (evt, list) => {
+    setOpen({ list: list, visible: true })
+    console.log(list);
+  }
+
+  const handleListDelete = (evt, list) => {
+    console.log(list);
+  }
+
+  const handleClose = () => {
+    setOpen({ list: 0, visible: false, text: ''})
+  }
+
+  const handleDialClick = (evt, name) => {
+    console.log(name)
+    if (name==='notedit') {
+        let buf = {...mode}
+        buf.edit=true;
+        setMode(buf)
+    }
+    if (name==='edit') {
+        let buf = {...mode}
+        buf.edit=false;
+        setMode(buf)
+    }
+    console.log(mode)
+  }
+
+  const handleListNameEdit = (evt) => {
+    console.log(evt.target.value);
+    let buf = copy(rows);
+    buf[open.list].name=opent;
+    setRows(buf);
+    setOpen({ list: 0, visible: false, text: ''});
+  }
+
+  const DialogM = () => {
+    return (
+        <Dialog open={open.visible} onClose={handleClose}>
+        <DialogTitle>Введи новое название</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Новое название списка"
+            fullWidth
+            variant="standard"
+            onChange={(event)=>setOpent(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Отменить</Button>
+          <Button onClick={(event)=>handleListNameEdit(event)} variant="contained">Принять</Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }
+
   return (
     <div>
+        <DialogM />
       {rows.map((data, list)=>{ return (
-      <Accordion key={data.name}>
+      <Accordion sx={{ boxShadow: 3 }} key={data.name}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
           id="panel1a-header"
           key={data.name}
+          sx={{ display: 'flex', justifyContent: 'center' }}
+          justifyContent="center"
         >
           <Typography>{data.name}</Typography>
+          {mode.edit&&<Box sx={{ margin: 0, padding: 0}}>
+            <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
+            <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
+          </Box>}
         </AccordionSummary>        
-        <AccordionDetails>
-          <Box sx={{ margin: '10px' }}>
+        <AccordionDetails sx={{ boxShadow: 3 }}>
+          <Box sx={{ margin: '10px', boxShadow: 3 }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
               <TableContainer>
                 <Table
                   aria-labelledby="tableTitle"
                   size={'small'}
+                  sx={{ boxShadow: 3 }}
                 >
                   <EnhancedTableHead />
                   <TableBody>
@@ -254,19 +343,20 @@ export default function PlaygroundSpeedDial({ api, user }) {
         </AccordionDetails>    
       </Accordion>
       )})}
-      <Box sx={{ transform: 'translateZ(0px)', flexGrow: 1 }}>
-        <Box sx={{ position: 'relative', height: "70vh" }}>
+      <Box>
+        <Box sx={{ boxShadow: 3, position: 'fixed', left: `${width>600 ? width-30 : width-15}px`, top: `${height>600 ? height-30 : height-15}px` }}>
           <StyledSpeedDial 
               sx={{  }} 
               ariaLabel="Кнопка"
               icon={<SpeedDialIcon />}
               direction='up'
           >
-            {actions.map((action) => (
+            {actions.map((action, index) => (
               <SpeedDialAction
                 key={action.name}
                 icon={action.icon}
                 tooltipTitle={action.name}
+                onClick={(event)=>handleDialClick(event, action.mode)}
               />
             ))}
           </StyledSpeedDial>
