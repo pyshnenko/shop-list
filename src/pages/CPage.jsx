@@ -35,6 +35,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import block from './../mech/apiTimer';
 import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
+import NewRowsTab from '../helpers/newRowsTab'
 
 const headCells = [
   {
@@ -98,6 +99,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
   const [opent, setOpent] = useState('');
   const [width, setWidth] = useState(window.innerWidth);
+  const [ openNewRowWindow, setOpenNewRowWindow ] = useState({visible: false, text: ''});
 
   const [height, setHeight] = useState(window.innerHeight);
 
@@ -125,7 +127,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
     console.log("useEffect");
     const fetchData = async () => {
       const result = await api.sendPost({}, 'lists', `Bearer ${user.token}`);
-      console.log(result.data.lists);
+      //console.log(result.data.lists);
       if (typeof(result.data.lists)==='string') setRows([]);
       else setRows(result.data.lists);
     }
@@ -186,6 +188,11 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
 
   const handleListDelete = (evt, list) => {
     console.log(list);
+    console.log(`id: ${rows[list].id}`);
+    let buf = copy(rows);
+    buf.splice(list,1);
+    setRows(buf);
+    //api.sendDel({}, 'lists', `Bearer ${user.token}`)
   }
 
   const handleClose = () => {
@@ -203,6 +210,9 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
         let buf = {...mode}
         buf.edit=false;
         setMode(buf)
+    }
+    if (name==='create') {
+        setOpenNewRowWindow({visible: true, text: ''})
     }
     console.log(mode)
   }
@@ -239,6 +249,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
 
   return (
     <div>
+        {openNewRowWindow.visible&&<NewRowsTab user={user} rows={rows} setRows={setRows} setOpenNewRowWindow={setOpenNewRowWindow}/>}
         <DialogM />
       {rows.map((data, list)=>{ return (
       <Accordion sx={{ boxShadow: 3 }} key={data.name}>
