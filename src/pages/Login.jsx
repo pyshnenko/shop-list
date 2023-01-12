@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
 import React, { useState } from 'react';
 
-export default function AccountMenu({ setState, data, setData, setUser, api }) {
+export default function AccountMenu({ openNewRowWindow, setOpenNewRowWindow, setLoadingInd, user, setRows, setState, data, setData, setUser, api }) {
 
     const [errState, setErrState] = useState({log: false, pass: false});
     const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
@@ -18,16 +18,32 @@ export default function AccountMenu({ setState, data, setData, setUser, api }) {
     }
 
     const loginButton = async (evt) => {
-        console.log('aaaaaaa')
+        setLoadingInd(true);
         evt.preventDefault();
         let answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '');
-        if (answ.data.data[0].hasOwnProperty('err')) console.log('error');
+        console.log(answ)
+        if (answ?.status!==200) {
+            console.log('error');
+            setLoadingInd(false);
+            let eBuf = {...openNewRowWindow};
+            eBuf.text='Неверные данные';
+            eBuf.error=true;
+            setOpenNewRowWindow(eBuf)
+        }
         else {
-            console.log(answ.data.data[0])
+            const result = await api.sendPost({name: user.name}, 'lists', `Bearer ${answ.data.data[0].token}`);
+            if (typeof(result.data.lists)==='string') setRows([]);
+            else setRows(result.data.lists);
             let rdata=answ.data.data[0]
-            setUser({login: rdata.login, token: rdata.token, role: rdata.role, name: rdata.name, last_name: rdata.last_name, first_name: rdata.first_name, email: rdata.email, emailValid: rdata.emailValid})
+            setUser(rdata)
             setState({login: true, state: 'centralPage'});
             setLabel({log: 'Логин', pass: 'Пароль'});
+            setLoadingInd(false);
+            let eBuf = {...openNewRowWindow};
+            eBuf.text='Данные получены';
+            eBuf.success=true;
+            setOpenNewRowWindow(eBuf);
+            localStorage.setItem('token', answ.data.data[0].token)
         }
     }
 
@@ -58,7 +74,6 @@ export default function AccountMenu({ setState, data, setData, setUser, api }) {
             margin: '100px',
             padding: '20px'
         }}
-        validate
         autoComplete="off"
         >
         <TextField 

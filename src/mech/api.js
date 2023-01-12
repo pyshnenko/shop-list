@@ -1,22 +1,24 @@
 import axios from "axios";
 let url;
-const baseURL = "http://45.89.66.91:8765/api";
+let baseURL = "http://45.89.66.91:8765/api";
 
 export default class sendApi {
     constructor(uri) {
         url = uri;
+        baseURL = uri;
     }
 
     async sendGet(obj) {
         let uri = url+'?';
-        Object.keys(obj).map((key) => {
+        return uri
+        /*Object.keys(obj).map((key) => {
             if ((typeof(obj[key]==='object'))||(typeof(obj[key]==='array'))) {
                 return 'typeError'
             }
             uri+=`${key}=${obj[key]}&`;
         })
         let response = await fetch(uri);          
-        return await response.json();
+        return await response.json();*/
     }
 
     async sendPost(obj, make, token) {
@@ -63,8 +65,8 @@ export default class sendApi {
         catch(e) {
             console.log('nop');
             console.log(e)
-            return ([{
-                name: 'list 1', author: 'nop', data: [
+            return (e.response)//[{
+             /*   name: 'list 1', author: 'nop', data: [
                 { name: 'Cupcake', total: 3, del: 0, selected: false },
                 { name: 'Donut', total: 2, del: 0, selected: false },
                 { name: 'Eclair', total: 3, del: 0, selected: false },
@@ -93,20 +95,24 @@ export default class sendApi {
                 { name: 'зефир', total: 4, del: 0, selected: false },
                 { name: 'нуга', total: 1, del: 0, selected: false },
                 { name: 'орео', total: 2, del: 0, selected: false },
-              ]}])
+              ]}])*/
         }
     }
 
-    async sendDelete(obj) {
-        let response = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',//application/x-www-form-urlencoded',
-              'make': 'login'
-            },
-            body: JSON.stringify(obj)//user//
+    async sendDelete(obj, make, token) {        
+        const jsonHeader = {
+            "Content-type": "application/json",
+            "make": make,
+            "authorization": '' || token
+        };
+
+        let send = axios.create({
+            baseURL,
+            headers: jsonHeader
         });
-          
-        let result = await response.json();
+        console.log(obj)
+        const res = await send.delete(baseURL, obj);
+        console.log(res); 
+        return res;
     }
 }

@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import copy from 'fast-copy';
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import SpeedDial from '@mui/material/SpeedDial';
-import SpeedDialIcon from '@mui/material/SpeedDialIcon';
-import SpeedDialAction from '@mui/material/SpeedDialAction';
-import SaveIcon from '@mui/icons-material/Save';
 import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
-//import { blueGrey, green } from '@mui/material/colors';
-//import PropTypes from 'prop-types';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -31,11 +24,10 @@ import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import block from './../mech/apiTimer';
-import EditOffOutlinedIcon from '@mui/icons-material/EditOffOutlined';
-import NewRowsTab from '../helpers/newRowsTab'
+import NewRowsTab from '../helpers/newRowsTab';
+import DButton from '../helpers/dialButton';
+import DWindow from '../helpers/dialogWindow';
 
 const headCells = [
   {
@@ -58,7 +50,7 @@ const headCells = [
   }
 ];
 
-function EnhancedTableHead(props) {
+function EnhancedTableHead() {
   return (
     <TableHead>
       <TableRow>
@@ -78,68 +70,20 @@ function EnhancedTableHead(props) {
   );
 }
 
-const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
-  position: 'absolute',
-  '&.MuiSpeedDial-directionUp, &.MuiSpeedDial-directionLeft': {
-    bottom: theme.spacing(2),
-    right: theme.spacing(2)
-  },
-  '&.MuiSpeedDial-directionDown, &.MuiSpeedDial-directionRight': {
-    top: theme.spacing(2),
-    left: theme.spacing(2)
-  },
-}));
+export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, setMode, setLoadingInd, openNewRowWindow, setOpenNewRowWindow }) {
 
-export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
+  const arrGen = (length) => {
+    let buf = [];
+    for (let i=0; i<length; i++) buf.push(0);
+    return buf;
+  }
 
-  const [ page, setPage ] = useState(0);
+  const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
   const [newRow, setNewRow] = useState({ name: '', total: '' });
-  const [ rows, setRows ] = useState([]);
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
   const [opent, setOpent] = useState('');
-  const [width, setWidth] = useState(window.innerWidth);
-  const [ openNewRowWindow, setOpenNewRowWindow ] = useState({visible: false, text: ''});
-
-  const [height, setHeight] = useState(window.innerHeight);
-
-  useEffect(() => {
-    const handleResize = (event) => {
-      setWidth(event.target.innerWidth);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleResize = (event) => {
-      setHeight(event.target.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  useEffect( () => {    
-    console.log("useEffect");
-    const fetchData = async () => {
-      const result = await api.sendPost({}, 'lists', `Bearer ${user.token}`);
-      //console.log(result.data.lists);
-      if (typeof(result.data.lists)==='string') setRows([]);
-      else setRows(result.data.lists);
-    }
-    if (block()) fetchData()
-  },
-  []);
-
-  const actions = [
-    { icon: <SaveIcon />, name: 'Сохранить', mode: 'save' },
-    { icon: mode.edit ? <ModeEditOutlineOutlinedIcon /> : <EditOffOutlinedIcon />, name: 'Редактировать', mode: mode.edit ? 'edit' : 'notedit' },
-    { icon: <SpeedDialIcon />, name: 'Создать', mode: 'create' },
-  ];
+  const [ editedLists, setEditedLists] = useState([]);
 
   const handleClick = (event, list, index) => {
     const rIndex = index + (page * rowsPerPage);
@@ -147,82 +91,104 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
     setRows();
     buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
     setRows(buf);
-    console.log(rows[list].data[rIndex])
+    console.log(rows[list].data[rIndex]);
+    if (!editedLists.includes(list)) {
+        buf = copy(editedLists);
+        buf.push(list);
+        setEditedLists(buf);
+    }
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangePage = (event, newPage, list) => {
+    console.log(list);
+    let bList = copy(page);
+    bList[list]=newPage
+    setPage(bList);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (event,list) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    let bPage = copy(page);
+    bPage[list]=0;
+    setPage(bPage);
   };
 
   const handleDelClick = async (evt, list, ind) => {
-    const index = ind + (page * rowsPerPage);
-    let p = page;
+    const index = ind + (page[list] * rowsPerPage);
+    let bpage = copy(page);
+    let p = page[list];
     let buf = {};
     buf = copy(rows);
     setRows()
     buf[list].data.splice(index, 1);
     setRows(buf);
-    let pp = Math.trunc((rows[list].data.length/rowsPerPage)-0.0001)
-    setPage(pp>p ? p : pp);
-  }
-
-  const addButton = (evt, list) => {
-    if ((newRow.name!=='')&&(newRow.total!=='')) {
-      let buf = copy(rows);
-      buf[list].data.push({name: newRow.name, total: newRow.total, del: 0});
-      setRows(buf);
-      setNewRow({name: '', total: '' });
-      setPage(Math.trunc((rows[list].data.length/rowsPerPage)-0.0001));
+    let pp = Math.trunc((rows[list].data.length/rowsPerPage)-0.001);
+    bpage[list]=(p<pp ? p : pp)
+    setPage(bpage);
+    if (!editedLists.includes(list)) {
+        let buf1 = copy (editedLists);
+        buf1.push(list);
+        setEditedLists(buf1);
     }
   }
 
+    const addButton = (evt, list) => {
+        if ((newRow.name!=='')&&(newRow.total!=='')) {
+            let buf = copy(rows);
+            buf[list].data.push({name: newRow.name, total: newRow.total, del: 0, selected: false});
+            setRows(buf);
+            setNewRow({name: '', total: '' });
+            let bPage = copy(page);
+            bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
+            setPage(bPage);
+            if (!editedLists.includes(list)) {
+                buf = copy (editedLists);
+                buf.push(list);
+                setEditedLists(buf);
+            }
+        }
+    }
+
   const handleListEdit = (evt, list) => {
-    setOpen({ list: list, visible: true })
+    setOpen({ list: list, visible: true, text: '' })
     console.log(list);
   }
 
   const handleListDelete = (evt, list) => {
+    setLoadingInd(true);
     console.log(list);
     console.log(`id: ${rows[list].id}`);
-    let buf = copy(rows);
-    buf.splice(list,1);
-    setRows(buf);
-    //api.sendDel({}, 'lists', `Bearer ${user.token}`)
+    let id = Number(rows[list].id);
+    api.sendPost({id: id}, 'delList', `Bearer ${user.token}`)
+      .then(()=>{        
+        let buf = copy(rows);
+        buf.splice(list,1);
+        setRows(buf);    
+        if (!editedLists.includes(list)) {
+            buf = copy (editedLists);
+            buf.push(list);
+            setEditedLists(buf);
+        }
+        setOpenNewRowWindow({visible: false, text: 'Удалено', error: false, success: true});
+        setLoadingInd(false);
+      }, (e)=>{
+        console.log(e);
+        setOpenNewRowWindow({visible: false, text: 'Ошбка', error: true, success: false});
+        setLoadingInd(false);
+      });
   }
 
   const handleClose = () => {
     setOpen({ list: 0, visible: false, text: ''})
   }
 
-  const handleDialClick = (evt, name) => {
-    console.log(name)
-    if (name==='notedit') {
-        let buf = {...mode}
-        buf.edit=true;
-        setMode(buf)
-    }
-    if (name==='edit') {
-        let buf = {...mode}
-        buf.edit=false;
-        setMode(buf)
-    }
-    if (name==='create') {
-        setOpenNewRowWindow({visible: true, text: ''})
-    }
-    console.log(mode)
-  }
-
   const handleListNameEdit = (evt) => {
-    console.log(evt.target.value);
-    let buf = copy(rows);
+    console.log(evt);
+    console.log(Object.keys(evt.target));
+    /*let buf = copy(rows);
     buf[open.list].name=opent;
     setRows(buf);
-    setOpen({ list: 0, visible: false, text: ''});
+    setOpen({ list: 0, visible: false, text: ''});*/
   }
 
   const DialogM = () => {
@@ -236,7 +202,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
             label="Новое название списка"
             fullWidth
             variant="standard"
-            onChange={(event)=>setOpent(event.target.value)}
+            name="tttext"
           />
         </DialogContent>
         <DialogActions>
@@ -249,19 +215,18 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
 
   return (
     <div>
-        {openNewRowWindow.visible&&<NewRowsTab user={user} rows={rows} setRows={setRows} setOpenNewRowWindow={setOpenNewRowWindow}/>}
-        <DialogM />
+      {openNewRowWindow.visible&&<NewRowsTab setLoadingInd={setLoadingInd} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows} setOpenNewRowWindow={setOpenNewRowWindow}/>}
+      {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {rows.map((data, list)=>{ return (
-      <Accordion sx={{ boxShadow: 3 }} key={data.name}>
+      <Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
           id="panel1a-header"
-          key={data.name}
+          key={data.name+list}
           sx={{ display: 'flex', justifyContent: 'center' }}
-          justifyContent="center"
         >
-          <Typography>{data.name}</Typography>
+          <Typography>{`${data.name} - ${data.author} - ID: ${data.id}`}</Typography>
           {mode.edit&&<Box sx={{ margin: 0, padding: 0}}>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
@@ -279,7 +244,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
                   <EnhancedTableHead />
                   <TableBody>
                     {rows[list].data
-                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .slice(page[list] * rowsPerPage, page[list] * rowsPerPage + rowsPerPage)
                       .map((row, index) => {
                         const isItemSelected = row.selected;
                         const labelId = `enhanced-table-checkbox-${index}`;
@@ -290,7 +255,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
                             role="checkbox"
                             aria-checked={isItemSelected}
                             tabIndex={-1}
-                            key={row.name}
+                            key={row.name+index}
                             selected={isItemSelected}
                           >
                             <TableCell padding="checkbox">
@@ -299,9 +264,6 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
                                 color="primary"
                                 checked={isItemSelected}
                                 onClick={(event) => handleClick(event, list, index)}
-                                inputProps={{
-                                  'aria-labelledby': labelId,
-                                }}
                               />
                             </TableCell>
                             <TableCell
@@ -331,9 +293,9 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
                 component="div"
                 count={rows[list].data.length}
                 rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
+                page={(page[list] ? page[list] : page[list]===0 ? 0 : 0)}
+                onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
+                onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
               />
               <Box>          
                 <TextField sx={{ margin: 2 }} label="Название" variant="standard" value={newRow.name} onChange={({ target }) => {
@@ -346,7 +308,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
                       setNewRow(resObj)}} />
               </Box>
               <Button
-                onClick={(event)=>addButton(event)}>
+                onClick={(event)=>addButton(event, list)}>
                 Добавить
               </Button>
             </Paper>
@@ -354,25 +316,7 @@ export default function PlaygroundSpeedDial({ api, user, mode, setMode }) {
         </AccordionDetails>    
       </Accordion>
       )})}
-      <Box>
-        <Box sx={{ boxShadow: 3, position: 'fixed', left: `${width>600 ? width-30 : width-15}px`, top: `${height>600 ? height-30 : height-15}px` }}>
-          <StyledSpeedDial 
-              sx={{  }} 
-              ariaLabel="Кнопка"
-              icon={<SpeedDialIcon />}
-              direction='up'
-          >
-            {actions.map((action, index) => (
-              <SpeedDialAction
-                key={action.name}
-                icon={action.icon}
-                tooltipTitle={action.name}
-                onClick={(event)=>handleDialClick(event, action.mode)}
-              />
-            ))}
-          </StyledSpeedDial>
-        </Box>
-      </Box>
+      <DButton setLoadingInd={setLoadingInd} api={api} mode={mode} setMode={setMode} rows={rows} user={user} setOpenNewRowWindow={setOpenNewRowWindow} editedLists={editedLists} />
     </div>
   );
 }

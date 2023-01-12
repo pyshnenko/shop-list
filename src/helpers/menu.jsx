@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { grey } from '@mui/material/colors';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -11,6 +13,7 @@ import PersonAdd from '@mui/icons-material/PersonAdd';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import Typography from '@mui/material/Typography';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function AccountMenu({ user, setUser, state, setState }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -25,7 +28,18 @@ export default function AccountMenu({ user, setUser, state, setState }) {
     console.log(ind);
     if (ind==='exit') {
       setUser({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
-      setState({login: false, state: ''})
+      setState({login: false, state: ''});
+      localStorage.clear();
+    }
+    else if (ind==='lists') {
+      let sState={...state};
+      sState.state='centralPage';
+      setState(sState)
+    }
+    else if (ind==='openlists') {
+      let sState={...state};
+      sState.state='unLogin';
+      setState(sState)
     }
   };
   return (
@@ -40,7 +54,7 @@ export default function AccountMenu({ user, setUser, state, setState }) {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>M</Avatar>
+            <Avatar sx={{ width: 32, height: 32 }}>{(user.first_name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
           </IconButton>
         </Tooltip>
         <Typography sx={{ minWidth: 100 }}>{user.login}</Typography>
@@ -84,7 +98,10 @@ export default function AccountMenu({ user, setUser, state, setState }) {
           <Avatar /> Профиль
         </MenuItem>
         <MenuItem onClick={(event)=> {handleMenuClick(event,'lists')}}>
-          <Avatar /> Мои списки
+          <InsertDriveFileIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Мои списки
+        </MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'openlists')}}>
+          <SearchIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Поиск списка
         </MenuItem>
         <Divider />
         <MenuItem onClick={(event)=> {handleMenuClick(event,'addfriend')}}>
