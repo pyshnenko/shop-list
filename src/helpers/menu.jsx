@@ -41,6 +41,11 @@ export default function AccountMenu({ user, setUser, state, setState }) {
       sState.state='unLogin';
       setState(sState)
     }
+    else if (ind==='profile') {
+      let sState={...state};
+      sState.state='profile';
+      setState(sState)
+    }
   };
   return (
     <React.Fragment>

@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import UnLogin from './pages/UnLogin';
 import Registation from './pages/Register';
 import CPage from './pages/CPage';
+import Profile from './pages/Profile';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
 import React, { useState, useEffect } from 'react';
@@ -84,6 +85,7 @@ function App() {
           {(!state.login)&&(state.state==='register')&&<Registation setLoadingInd = {setLoadingInd} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
           {(state.state==='unLogin')&&<UnLogin openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} setLoadingInd = {setLoadingInd} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
           {(state.login)&&(state.state==='centralPage')&&<CPage openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} setLoadingInd = {setLoadingInd} rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+          {(state.login)&&(state.state==='profile')&&<Profile openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} setLoadingInd = {setLoadingInd} rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
         </div>
       </ThemeProvider>
     </div>
