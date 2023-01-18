@@ -69,9 +69,9 @@ export default function AccountMenu({ openNewRowWindow, setOpenNewRowWindow, set
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '50%',
+            width: '50vw',
             minWidth: '250px',
-            margin: '100px',
+            marginTop: '100px',
             padding: '20px'
         }}
         autoComplete="off"

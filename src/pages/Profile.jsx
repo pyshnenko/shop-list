@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
-import { blue, blueGrey, green, grey, lightBlue, red, yellow } from '@mui/material/colors';
+import { blueGrey, green, grey, lightBlue, red, yellow } from '@mui/material/colors';
 import Avatar from '@mui/material/Avatar';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,7 +31,7 @@ export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoad
 
     const handleEditClickCheck = async () => {
         console.log('ready');
-        let buf = {...edit};
+        //let buf = {...edit};
         //Object.assign(buf, edit);
         //console.log(buf);
         let bufS = {};
@@ -71,9 +70,9 @@ export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoad
                 alignItems: 'flex-start',
                 justifyContent: 'space-evenly',
                 flexWrap: 'wrap',
-                width: '75%',
+                width: '75vw',
                 minWidth: '350px',
-                margin: '100px',
+                margin: '100px 0',
                 padding: '20px'
             }}>
                 <Box>

@@ -86,7 +86,6 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
   return (
     <Box sx={{ 
             width: '100%',
-            height: '100%',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -101,7 +100,6 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '50%',
                 minWidth: '250px',
                 margin: '10px',
                 padding: '20px'
@@ -118,6 +116,7 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
                 label='ID списка' 
                 value={seech} 
                 variant="outlined" 
+                type="number"
                 onChange={({ target }) => {
                     setSeech(target.value)
             }} />        
@@ -135,9 +134,8 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '50%',
                 minWidth: '250px',
-                margin: '100px',
+                marginTop: '100px',
                 padding: '20px'
             }}>
             {!bdata.error&&<TableContainer sx={{ margin: '10px' }} component={Paper}>

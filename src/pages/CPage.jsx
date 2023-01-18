@@ -21,10 +21,10 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
+//import Dialog from '@mui/material/Dialog';
+//import DialogActions from '@mui/material/DialogActions';
+//import DialogContent from '@mui/material/DialogContent';
+//import DialogTitle from '@mui/material/DialogTitle';
 import NewRowsTab from '../helpers/newRowsTab';
 import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
@@ -82,16 +82,14 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
   const [newRow, setNewRow] = useState({ name: '', total: '' });
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
-  const [opent, setOpent] = useState('');
+  //const [opent, setOpent] = useState('');
   const [ editedLists, setEditedLists] = useState([]);
 
   const handleClick = (event, list, index) => {
-    const rIndex = index + (page * rowsPerPage);
+    const rIndex = index + (page[list] * rowsPerPage);
     let buf = copy(rows);
-    setRows();
     buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
     setRows(buf);
-    console.log(rows[list].data[rIndex]);
     if (!editedLists.includes(list)) {
         buf = copy(editedLists);
         buf.push(list);
@@ -178,20 +176,20 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
       });
   }
 
-  const handleClose = () => {
+  /*const handleClose = () => {
     setOpen({ list: 0, visible: false, text: ''})
-  }
+  }*/
 
-  const handleListNameEdit = (evt) => {
+  /*const handleListNameEdit = (evt) => {
     console.log(evt);
     console.log(Object.keys(evt.target));
-    /*let buf = copy(rows);
+    let buf = copy(rows);
     buf[open.list].name=opent;
     setRows(buf);
-    setOpen({ list: 0, visible: false, text: ''});*/
-  }
+    setOpen({ list: 0, visible: false, text: ''});
+  }*/
 
-  const DialogM = () => {
+  /*const DialogM = () => {
     return (
         <Dialog open={open.visible} onClose={handleClose}>
         <DialogTitle>Введи новое название</DialogTitle>
@@ -211,7 +209,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
         </DialogActions>
       </Dialog>
     )
-  }
+  }*/
 
   return (
     <div>
