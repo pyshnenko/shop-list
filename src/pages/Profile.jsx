@@ -66,6 +66,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                 justifyContent: 'space-evenly',
                 flexWrap: 'wrap',
                 width: '75vw',
+                maxWidth: '750px',
                 minWidth: '350px',
                 margin: '100px 0',
                 padding: '20px'
