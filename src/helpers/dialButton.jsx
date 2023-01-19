@@ -7,6 +7,7 @@ import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutl
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
 import { styled } from '@mui/material/styles';
+import { setLoadingIndex } from '../helpers/leftInfoWindow';
 
 const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
     position: 'absolute',
@@ -20,7 +21,7 @@ const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
     },
   }));
 
-export default function SMess({api, mode, setMode, rows, user, setOpenNewRowWindow, editedLists, setLoadingInd}) {
+export default function SMess({api, mode, setMode, rows, user, setVisibleWindowNewRow, editedLists }) {
     const [height, setHeight] = useState(window.innerHeight);
     const [width, setWidth] = useState(window.innerWidth);
 
@@ -63,15 +64,16 @@ export default function SMess({api, mode, setMode, rows, user, setOpenNewRowWind
             setMode(buf)
         }
         if (name==='create') {
-            setOpenNewRowWindow({visible: true, text: '', error: false, success: false});
+          setVisibleWindowNewRow(true);
             //api.sendPost()
         }
         if (name==='save'){
-            setLoadingInd(true);
+            setLoadingIndex(true);
             console.log('save');
+            console.log('editedLists');
             for (let i=0; i<editedLists.length; i++)
                 console.log(await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`));
-            setLoadingInd(false);
+            setLoadingIndex(false);
         }
         console.log(mode)
       }

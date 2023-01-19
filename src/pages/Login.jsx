@@ -3,8 +3,9 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
 import React, { useState } from 'react';
+import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 
-export default function AccountMenu({ openNewRowWindow, setOpenNewRowWindow, setLoadingInd, user, setRows, setState, data, setData, setUser, api }) {
+export default function AccountMenu({ user, setRows, setState, data, setData, setUser, api }) {
 
     const [errState, setErrState] = useState({log: false, pass: false});
     const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
@@ -18,17 +19,13 @@ export default function AccountMenu({ openNewRowWindow, setOpenNewRowWindow, set
     }
 
     const loginButton = async (evt) => {
-        setLoadingInd(true);
+        setLoadingIndex(true);
         evt.preventDefault();
         let answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '');
         console.log(answ)
         if (answ?.status!==200) {
             console.log('error');
-            setLoadingInd(false);
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='Неверные данные';
-            eBuf.error=true;
-            setOpenNewRowWindow(eBuf)
+            getInfoMessage('error', 'Неверные данные', false);
         }
         else {
             const result = await api.sendPost({name: user.name}, 'lists', `Bearer ${answ.data.data[0].token}`);
@@ -38,11 +35,7 @@ export default function AccountMenu({ openNewRowWindow, setOpenNewRowWindow, set
             setUser(rdata)
             setState({login: true, state: 'centralPage'});
             setLabel({log: 'Логин', pass: 'Пароль'});
-            setLoadingInd(false);
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='Данные получены';
-            eBuf.success=true;
-            setOpenNewRowWindow(eBuf);
+            getInfoMessage('success', 'Данные получены', false);
             localStorage.setItem('token', answ.data.data[0].token)
         }
     }

@@ -4,26 +4,26 @@ import Box from '@mui/material/Box';
 import { blueGrey } from '@mui/material/colors';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import { setLoadingIndex } from '../helpers/leftInfoWindow';
 
-export default function NewRowsTab({editedLists, setEditedLists, api, rows, setRows, setOpenNewRowWindow, user, setLoadingInd}) {
+export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEditedLists, api, rows, setRows, user }) {
     const [ name, setName ] = React.useState('')
     const handleEnter = async (evt) => {
-        setLoadingInd(true);
+        setLoadingIndex(true);
         console.log(user.token);
-        setOpenNewRowWindow({visible: false, text: name, error: false, success: false});
+        setVisibleWindowNewRow(false);
         let bbb = await api.sendPost({name: name, author: user.first_name || user.login, data: [], access: 'me', accessUsers: [user.login]}, 'setList', `Bearer ${user.token}`);
         console.log(bbb);
-        //let res = await api.sendPost({}, 'lists', `Bearer ${user.token}`);
         setRows(bbb.data.list);
         console.log(bbb.data.list);
         let buf = copy (editedLists);
         buf.push(rows.length-1);
         setEditedLists(buf);
-        setLoadingInd(false);
+        setLoadingIndex(false);
     }
 
     const handleClosed = (evt) => {        
-        setOpenNewRowWindow({visible: false, text: '', error: false, success: false})
+        setVisibleWindowNewRow(false);
     }
 
     return (

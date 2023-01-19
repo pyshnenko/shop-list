@@ -21,13 +21,10 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
-//import Dialog from '@mui/material/Dialog';
-//import DialogActions from '@mui/material/DialogActions';
-//import DialogContent from '@mui/material/DialogContent';
-//import DialogTitle from '@mui/material/DialogTitle';
 import NewRowsTab from '../helpers/newRowsTab';
 import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
+import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 
 const headCells = [
   {
@@ -70,7 +67,7 @@ function EnhancedTableHead() {
   );
 }
 
-export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, setMode, setLoadingInd, openNewRowWindow, setOpenNewRowWindow }) {
+export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, setMode }) {
 
   const arrGen = (length) => {
     let buf = [];
@@ -81,6 +78,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
   const [newRow, setNewRow] = useState({ name: '', total: '' });
+  const [ visibleWindowNewRow, setVisibleWindowNewRow ] = useState(false);
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
   //const [opent, setOpent] = useState('');
   const [ editedLists, setEditedLists] = useState([]);
@@ -153,7 +151,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
   }
 
   const handleListDelete = (evt, list) => {
-    setLoadingInd(true);
+    setLoadingIndex(true);
     console.log(list);
     console.log(`id: ${rows[list].id}`);
     let id = Number(rows[list].id);
@@ -167,53 +165,20 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
             buf.push(list);
             setEditedLists(buf);
         }
-        setOpenNewRowWindow({visible: false, text: 'Удалено', error: false, success: true});
-        setLoadingInd(false);
+        getInfoMessage('success', 'Удалено');
+        setVisibleWindowNewRow(false);
+        setLoadingIndex(false);
       }, (e)=>{
         console.log(e);
-        setOpenNewRowWindow({visible: false, text: 'Ошбка', error: true, success: false});
-        setLoadingInd(false);
+        getInfoMessage('error', 'Ошбка');
+        setVisibleWindowNewRow(false);
+        setLoadingIndex(false);
       });
   }
 
-  /*const handleClose = () => {
-    setOpen({ list: 0, visible: false, text: ''})
-  }*/
-
-  /*const handleListNameEdit = (evt) => {
-    console.log(evt);
-    console.log(Object.keys(evt.target));
-    let buf = copy(rows);
-    buf[open.list].name=opent;
-    setRows(buf);
-    setOpen({ list: 0, visible: false, text: ''});
-  }*/
-
-  /*const DialogM = () => {
-    return (
-        <Dialog open={open.visible} onClose={handleClose}>
-        <DialogTitle>Введи новое название</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Новое название списка"
-            fullWidth
-            variant="standard"
-            name="tttext"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Отменить</Button>
-          <Button onClick={(event)=>handleListNameEdit(event)} variant="contained">Принять</Button>
-        </DialogActions>
-      </Dialog>
-    )
-  }*/
-
   return (
     <div>
-      {openNewRowWindow.visible&&<NewRowsTab setLoadingInd={setLoadingInd} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows} setOpenNewRowWindow={setOpenNewRowWindow}/>}
+      {visibleWindowNewRow&&<NewRowsTab setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {rows.map((data, list)=>{ return (
       <Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
@@ -314,7 +279,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
         </AccordionDetails>    
       </Accordion>
       )})}
-      <DButton setLoadingInd={setLoadingInd} api={api} mode={mode} setMode={setMode} rows={rows} user={user} setOpenNewRowWindow={setOpenNewRowWindow} editedLists={editedLists} />
+      <DButton api={api} mode={mode} setMode={setMode} rows={rows} user={user} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} />
     </div>
   );
 }

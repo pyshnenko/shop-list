@@ -46,6 +46,11 @@ export default function AccountMenu({ user, setUser, state, setState }) {
       sState.state='profile';
       setState(sState)
     }
+    else if (ind==='addfriend') {
+      let sState={...state};
+      sState.state='addfriend';
+      setState(sState)
+    }
   };
   return (
     <React.Fragment>
@@ -59,7 +64,7 @@ export default function AccountMenu({ user, setUser, state, setState }) {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>{(user.first_name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
+            <Avatar sx={{ width: 32, height: 32 }}>{(user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
           </IconButton>
         </Tooltip>
         <Typography sx={{ minWidth: 100 }}>{user.login}</Typography>

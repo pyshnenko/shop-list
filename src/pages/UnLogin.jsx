@@ -13,51 +13,52 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
+import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 
-export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNewRowWindow, state, setState, data, setData, api }) {
+export default function AccountMenu({ state, setState, data, setData, api }) {
 
-    const [ errState, setErrState ] = useState({log: false, pass: false});
+    const errState = ({log: false, pass: false});
     const [ seech, setSeech ] = useState('');
     const [ bdata, setBData ] = useState({visible: false, error: false, textError: '', row: {}});
     const [ rows, setRows ] = useState([]);
 
+    const styleBox = {
+        borderRadius: '50px',
+        boxShadow: 3,
+        backgroundColor: blueGrey[900],
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '250px',
+        marginTop: '100px',
+        padding: '20px'
+    }
+
     const seechButton = async (evt) => {
-        setLoadingInd(true);
+        setLoadingIndex(true);
         console.log(seech)
         if (evt) evt.preventDefault();
         let answ = await api.sendPost({id: seech}, 'askList', '');
         if (answ.status===200) {
             setRows(answ.data.res.data);
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='Данные получены';
-            eBuf.success=true;
-            setOpenNewRowWindow(eBuf)
-            setBData({visible: true, error: false, textError: '', row: answ.data.res})
-            setLoadingInd(false);
+            setBData({visible: true, error: false, textError: '', row: answ.data.res});
+            getInfoMessage('success', 'Данные получены', false);
         }
         else if (answ.status===402) {
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='Отказ в доступе';
-            eBuf.error=true;
-            setOpenNewRowWindow(eBuf)
-            setBData({visible: true, error: true, textError: 'Отказ в доступе', row: {}})
-            setLoadingInd(false);
+            setBData({visible: true, error: true, textError: 'Отказ в доступе', row: {}});
+            getInfoMessage('error', 'Отказ в доступе', false);
+            setLoadingIndex(false);
         }
         else if (answ.status===401) {
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='ID не найден';
-            eBuf.error=true;
-            setOpenNewRowWindow(eBuf)
+            getInfoMessage('error', 'ID не найден');
             setBData({visible: true, error: true, textError: 'ID не найден', row: {}})
-            setLoadingInd(false);
+            setLoadingIndex(false);
         }
         else {
-            let eBuf = {...openNewRowWindow};
-            eBuf.text='Скорее всего АПИ упала';
-            eBuf.error=true;
-            setOpenNewRowWindow(eBuf)
+            getInfoMessage('error', 'Скорее всего АПИ упала');
             setBData({visible: true, error: true, textError: 'Скорее всего АПИ упала', row: {}})
-            setLoadingInd(false); 
+            setLoadingIndex(false); 
         }
         console.log(answ);
     }
@@ -77,33 +78,16 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
     }
 
     const saveButton = async (evt) => {
-        setLoadingInd(true); 
+        setLoadingIndex(true); 
         let act = await api.sendPost({list: {id: seech, data: rows}}, 'updUList', '');
         console.log(act);
         await seechButton();
     }
 
   return (
-    <Box sx={{ 
-            width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
-        }}>
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly' }}>
         <Box
-            sx={{
-                borderRadius: '50px',
-                boxShadow: 3,
-                backgroundColor: blueGrey[900],
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: '250px',
-                margin: '10px',
-                padding: '20px'
-            }}
+            sx={styleBox}
             autoComplete="off"
             >
             <Typography variant="h6" sx={{ color: blueGrey[200] }}>
@@ -126,18 +110,7 @@ export default function AccountMenu({ setLoadingInd, openNewRowWindow, setOpenNe
             </Box>
         </Box>
         {bdata.visible&&<Box
-            sx={{
-                borderRadius: '50px',
-                boxShadow: 3,
-                backgroundColor: blueGrey[900],
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: '250px',
-                marginTop: '100px',
-                padding: '20px'
-            }}>
+            sx={styleBox}>
             {!bdata.error&&<TableContainer sx={{ margin: '10px' }} component={Paper}>
                 <Table size="small" aria-label="simple table">
                     <TableHead>

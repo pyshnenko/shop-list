@@ -1,7 +1,6 @@
 @font-face {
     font-family: 'Vasek';
     src: url('../fonts/Vasek Italic_0.ttf') format('truetype');
-    font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
@@ -36,7 +35,8 @@
     #neonDiv {
         position: fixed;
         top: 50px;
-        left: 80%;
+        left: 100vw;
+        margin-left: -250px;
     }
 
 }
@@ -52,7 +52,7 @@
 #neonH2, #neonH2F, #neonH2l {
     margin-top: 30px;
     font-family: Vasek;
-    font-size: xxx-large;
+    font-size: 100px;
     color: #f0fff0;
     text-shadow: 0 0 7px #fff,
         0 0 10px #fff,
@@ -65,7 +65,7 @@
 }
 
 #neonH2l {
-    transform: translate(3px, 9px) rotateZ(62deg);
+    transform: translate(5px, 16px) rotateZ(62deg)
 }
 
 #three {
@@ -248,7 +248,7 @@
             0 0 152px #0fa;
     }
     21% {
-        color: #000000;
+        color: #00402B;
         text-shadow: 0 0 7px #000,
             0 0 10px #000,
             0 0 21px #000,
@@ -259,7 +259,7 @@
             0 0 151px #000;
     }
     30% {
-        color: #000000;
+        color: #00402B;
         text-shadow: 0 0 7px #000,
             0 0 10px #000,
             0 0 21px #000,
@@ -281,7 +281,7 @@
             0 0 152px #0fa;
     }
     32% {
-        color: #000000;
+        color: #00402B;
         text-shadow: 0 0 7px #000,
             0 0 10px #000,
             0 0 21px #000,
@@ -292,7 +292,7 @@
             0 0 151px #000;
     } 
     40% {
-        color: #000000;
+        color: #00402B;
         text-shadow: 0 0 7px #000,
             0 0 10px #000,
             0 0 21px #000,
@@ -303,7 +303,7 @@
             0 0 151px #000;
     }
     50% {
-        color: #000000;
+        color: #00402B;
         text-shadow: 0 0 7px #000,
             0 0 10px #000,
             0 0 21px #000,

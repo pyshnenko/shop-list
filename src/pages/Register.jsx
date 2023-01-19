@@ -135,10 +135,24 @@ export default function Registration({ data, setData, state, setState, user, set
                 setOpen(dat)
             }
             else {
-                let dat = {...checkPass};
-                dat.errorL=false;
-                setCheckPass(dat)
-                setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                console.log('вот тут надо проверить');
+                let promis = await api.sendPost({login: data.log}, 'checkLogin', '');
+                console.log(promis.data.result)
+                if (promis.data.result==='buzy') {
+                    let dat = {...checkPass};
+                    dat.errorL=true;
+                    setCheckPass(dat)
+                    dat = {...open};
+                    dat.text='Логин занят';
+                    dat.error=true;
+                    setOpen(dat)
+                }
+                else {
+                    let dat = {...checkPass};
+                    dat.errorL=false;
+                    setCheckPass(dat)
+                    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+                }
             }
         }
         else if (activeStep===1) {

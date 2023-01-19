@@ -8,14 +8,15 @@ import CloseIcon from '@mui/icons-material/Close';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 
-export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoadingInd, user, setRows, setState, data, setData, setUser, api }) { 
+export default function Profile({ user, setRows, setState, data, setData, setUser, api }) { 
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
     const textFields = [ 
         {text: 'Логин:', index: 'login'}, 
         {text: 'Имя:', index: 'name'}, 
-        {text: 'Фамилия:', index: 'first_name'}, 
-        {text: 'Отчество:', index: 'last_name'}, 
+        {text: 'Фамилия:', index: 'last_name'}, 
+        {text: 'Отчество:', index: 'first_name'}, 
         {text: 'Почта:', index: 'email'}, 
         {text: 'telegram:', index: 'telegram'} 
     ]
@@ -31,11 +32,8 @@ export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoad
 
     const handleEditClickCheck = async () => {
         console.log('ready');
-        //let buf = {...edit};
-        //Object.assign(buf, edit);
-        //console.log(buf);
-        let bufS = {};
-        await Object.keys(edit).map((key)=>{if (key!=='activate') bufS[key]=edit[key]});
+        let bufS = {...edit};
+        delete bufS.activate;
         let res = await api.sendPost(bufS, 'updUserData', `Bearer ${user.token}`);
         setUser(res.data.data[0]);
         setEdit({activate: false, name: user.name, first_name: user.first_name, last_name: user.last_name, email: user.email, telegram: user.telegram});
@@ -43,14 +41,11 @@ export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoad
     }
 
     const handleValidClick = async () => {        
-        setLoadingInd(true);
+        setLoadingIndex(true);
         console.log('valid');
         console.log(await api.sendPost({}, 'checkMail', `Bearer ${user.token}`))
-        setLoadingInd(false);
-        let eBuf = {...openNewRowWindow};
-        eBuf.text='Данные отправлены';
-        eBuf.success=true;
-        setOpenNewRowWindow(eBuf);
+        setLoadingIndex(false);
+        getInfoMessage('success','Данные отправлены');
     }
 
     return (
@@ -80,7 +75,7 @@ export default function Profile({ openNewRowWindow, setOpenNewRowWindow, setLoad
                         alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
                         src={user.avatar ? user.avatar : ''}
                         sx={{ width: 50, height: 50, backgroundColor: grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
-                    >{user.avatar ? '' : (user.first_name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
+                    >{user.avatar ? '' : (user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
                     <Typography variant="h5" gutterBottom>{user.role}</Typography>
                 </Box>
                 <Box sx={{ 
