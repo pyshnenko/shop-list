@@ -25,6 +25,7 @@ import NewRowsTab from '../helpers/newRowsTab';
 import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
+import Grow from '@mui/material/Grow';
 
 const headCells = [
   {
@@ -181,7 +182,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
       {visibleWindowNewRow&&<NewRowsTab setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {rows.map((data, list)=>{ return (
-      <Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
+      <Grow in={true} {...({ timeout: 1000 * list })} key={data.name+list}><Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
@@ -189,12 +190,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
           key={data.name+list}
           sx={{ display: 'flex', justifyContent: 'center' }}
         >
+          {console.log(data)}
           <Typography>{`${data.name} - ${data.author} - ID: ${data.id}`}</Typography>
           {mode.edit&&<Box sx={{ margin: 0, padding: 0}}>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
           </Box>}
-        </AccordionSummary>        
+        </AccordionSummary>
         <AccordionDetails sx={{ boxShadow: 3 }}>
           <Box sx={{ margin: '10px', boxShadow: 3 }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
@@ -277,7 +279,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
             </Paper>
           </Box>
         </AccordionDetails>    
-      </Accordion>
+      </Accordion></Grow>
       )})}
       <DButton api={api} mode={mode} setMode={setMode} rows={rows} user={user} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} />
     </div>

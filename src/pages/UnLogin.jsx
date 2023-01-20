@@ -14,6 +14,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
+import Grow from '@mui/material/Grow';
 
 export default function AccountMenu({ state, setState, data, setData, api }) {
 
@@ -86,7 +87,7 @@ export default function AccountMenu({ state, setState, data, setData, api }) {
 
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly' }}>
-        <Box
+        <Grow in={true}><Box
             sx={styleBox}
             autoComplete="off"
             >
@@ -108,8 +109,8 @@ export default function AccountMenu({ state, setState, data, setData, api }) {
                 <Button type="submit" sx={{ backgroundColor: blue[800], boxShadow: 3, margin: 1 }} onClick = {(event)=>seechButton(event)} variant="contained">Поиск</Button>
                 <Button sx={{ backgroundColor: green[400], boxShadow: 3, margin: 1 }} onClick = {(event)=>backButton(event)} variant="contained">Назад</Button> 
             </Box>
-        </Box>
-        {bdata.visible&&<Box
+        </Box></Grow>
+        {bdata.visible&&<Grow in={true}><Box
             sx={styleBox}>
             {!bdata.error&&<TableContainer sx={{ margin: '10px' }} component={Paper}>
                 <Table size="small" aria-label="simple table">
@@ -143,7 +144,7 @@ export default function AccountMenu({ state, setState, data, setData, api }) {
             </TableContainer>}
             {!bdata.error&&<Button onClick = {(event)=>saveButton(event)}>Сохранить</Button>}
             {bdata.error&&<h1 style={{ 'padding':'0', 'margin':'0', 'fontFamily': 'monospace' }}>{bdata.textError}</h1>}
-        </Box>}
+        </Box></Grow>}
     </Box>
   );
 }

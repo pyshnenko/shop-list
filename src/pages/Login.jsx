@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
 import React, { useState } from 'react';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
+import Grow from '@mui/material/Grow';
 
 export default function AccountMenu({ user, setRows, setState, data, setData, setUser, api }) {
 
@@ -50,8 +51,8 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
         setState({login: false, state: 'unLogin'})
     }
 
-  return (
-    <Box
+  return (    
+    <Grow in={true}><Box
         component="form"
         onSubmit={(event)=>handleSubmit(event)}
         sx={{
@@ -93,6 +94,6 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
             <Button sx={{ backgroundColor: green[400], boxShadow: 3, margin: 1 }} onClick = {(event)=>regButton(event)} variant="contained">Регистрация</Button> 
         </Box>
         <Button sx={{ backgroundColor: blue[100], boxShadow: 3, margin: 1 }} onClick = {(event)=>unLoginMode(event)} variant="contained">Продолжить без регистрации </Button>
-    </Box>
+    </Box></Grow>
   );
 }

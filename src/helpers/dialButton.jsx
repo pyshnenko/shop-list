@@ -71,6 +71,7 @@ export default function SMess({api, mode, setMode, rows, user, setVisibleWindowN
             setLoadingIndex(true);
             console.log('save');
             console.log('editedLists');
+            console.log(editedLists);
             for (let i=0; i<editedLists.length; i++)
                 console.log(await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`));
             setLoadingIndex(false);

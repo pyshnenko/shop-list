@@ -60,7 +60,8 @@ function App() {
                 setRows(lists.data.lists);
                 setState({login: true, state: 'centralPage'});
                 getInfoMessage('success', 'Данные получены', false)
-                localStorage.setItem('token', res.data.token)
+                localStorage.setItem('token', res.data.token);
+                if (localStorage.state) setState(JSON.parse(localStorage.state))
               }
             })
           }
@@ -70,6 +71,8 @@ function App() {
   }, [])
 
   useEffect(() => {
+    console.log(state);
+    if (state.login) localStorage.setItem('state', JSON.stringify(state))
     if ((state.login)&&(state.state==='')) setState({login: true, state: 'centralPage'})
   }, [state]);
   
@@ -79,7 +82,7 @@ function App() {
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
       {loadingInd&&<Loading />}
       {state.login&&<header className="App-header">
-        <Menu user={user} setUser={setUser} state={state} setState={setState}/>
+        <Menu user={user} setUser={setUser} state={state} setState={setState} setRows={setRows}/>
       </header>}
       <ThemeProvider theme={darkTheme}>
       <CssBaseline />

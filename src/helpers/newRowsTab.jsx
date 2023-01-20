@@ -5,6 +5,7 @@ import { blueGrey } from '@mui/material/colors';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { setLoadingIndex } from '../helpers/leftInfoWindow';
+import Grow from '@mui/material/Grow';
 
 export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEditedLists, api, rows, setRows, user }) {
     const [ name, setName ] = React.useState('')
@@ -28,7 +29,7 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
 
     return (
         <div>
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Grow in={true}><Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ bgcolor: blueGrey[900], padding: '40px',
                     position: 'fixed', top: '40vh', zIndex: '9999', boxShadow: 3, borderRadius: '50px' }}>
                     <TextField sx={{ width: '300px', boxShadow: 3, bgcolor: blueGrey[800] }} 
@@ -41,7 +42,7 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
                             onClick={(event)=>handleClosed(event)}>Отменить</Button>
                     </Box>
                 </Box>
-            </Box>
+            </Box></Grow>
         </div>
     );
   }

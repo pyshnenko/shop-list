@@ -14,7 +14,7 @@ export default function SMess({openNewRowWindow ,setOpenNewRowWindow}) {
     };
 
     return (
-        <Stack sx={{ width: '20%', minWidth: '200px', position: 'fixed', left: '20px', top: '87vh' }} spacing={2}>  
+        <Stack sx={{ width: '20%', minWidth: '200px', position: 'fixed', left: '20px', top: '87vh', zIndex: 9999 }} spacing={2}>  
             <Snackbar open={openNewRowWindow.success} autoHideDuration={6000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success" sx={{ width: '100%' }}>
                     {openNewRowWindow.text}

@@ -28,6 +28,8 @@
     flex-direction: row;
     align-items: center;
     z-index: 5;
+    opacity: 0;
+    animation: startH 3s 10s ease-in-out forwards ;
 }
 
 @media screen and (min-aspect-ratio: 86/90) {
@@ -62,6 +64,15 @@
         0 0 92px #0fa,
         0 0 102px #0fa,
         0 0 151px #0fa;
+}
+
+@keyframes startH {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
 }
 
 #neonH2l {

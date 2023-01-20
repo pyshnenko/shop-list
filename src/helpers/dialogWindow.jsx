@@ -8,6 +8,7 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import Grow from '@mui/material/Grow';
 
 export default function DWindow({ editedLists, setEditedLists, open, setOpen, rows, setRows, user}) {
 
@@ -64,7 +65,7 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
     };
 
     return (
-        <Box
+        <Grow in={true}><Box
             sx={{ 
                 position: 'fixed',
                 left: 0,
@@ -134,6 +135,6 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
                 }}>
 
             </Box>}
-        </Box>
+        </Box></Grow>
     )
 }

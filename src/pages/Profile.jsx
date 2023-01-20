@@ -9,6 +9,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
+import Grow from '@mui/material/Grow';
 
 export default function Profile({ user, setRows, setState, data, setData, setUser, api }) { 
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
@@ -55,7 +56,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
             flexDirection: 'column',
             justifyContent: 'space-evenly',
             alignItems: 'center',
-        }}>
+        }}><Grow in={true}>
             <Box sx={{
                 borderRadius: '50px',
                 boxShadow: 3,
@@ -115,7 +116,11 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                         </Box>
                     )})}
                 </Box>
-            </Box>
+            </Box></Grow>
+            <Grow
+            in={true}
+                {...({ timeout: 1000 })}
+            >
             <Box sx={{
                 borderRadius: '50px',
                 boxShadow: 3,
@@ -125,7 +130,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                 padding: '20px'
             }}>
                 <Typography variant="h5" gutterBottom>{user.friends.length!==0 ? 'Список друзей' : 'Друзей пока нет'}</Typography>
-            </Box>
+            </Box></Grow>
         </Box>
     )
 }
