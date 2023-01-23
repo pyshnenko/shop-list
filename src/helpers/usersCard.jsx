@@ -64,7 +64,7 @@ export default function UsersCard({ user, setUser, api }) {
                 opacity: '1',
                 zIndex: 11
             }}>
-                <IconButton sx={{ backgroundColor: red[700], position: 'fixed' }} onClick={(event=>setUser({visible: false}))} ><CloseIcon /></IconButton>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}><IconButton sx={{ position: 'fixed' }} onClick={(event=>setUser({visible: false}))} ><CloseIcon /></IconButton></Box>
                 <Box>
                     <Avatar
                         alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
@@ -72,7 +72,7 @@ export default function UsersCard({ user, setUser, api }) {
                         sx={{ width: 50, height: 50, backgroundColor: grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
                     >{user.avatar ? '' : (user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
                     <Typography variant="h5" gutterBottom>{user.role}</Typography>
-                    {user.asked&&<Typography variant="h5" gutterBottom>Ожидаем ответ</Typography>}
+                    {user.asked&&<Typography sx={{ fontSize: 'medium', marginTop: '20px', color: 'cadetblue' }} variant="h5" gutterBottom>Ожидаем ответ</Typography>}
                     {user.friend&&<Typography variant="h5" gutterBottom>Ваш друг</Typography>}
                     {user.friend&&<Button onClick={(event)=>handleDelFriend()}>Удалить из друзей</Button>}
                     {(!user.asked)&&(!user.friend)&&<Button onClick={(event)=>handleAddFriend()}>Добавить в друзья</Button>}

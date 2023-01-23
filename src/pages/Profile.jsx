@@ -10,6 +10,13 @@ import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 export default function Profile({ user, setRows, setState, data, setData, setUser, api }) { 
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
@@ -44,9 +51,17 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
     const handleValidClick = async () => {        
         setLoadingIndex(true);
         console.log('valid');
-        console.log(await api.sendPost({}, 'checkMail', `Bearer ${user.token}`))
-        setLoadingIndex(false);
-        getInfoMessage('success','Данные отправлены');
+        console.log(await api.sendPost({}, 'checkMail', `Bearer ${user.token}`));
+        getInfoMessage('success','Данные отправлены', false);
+    }
+
+    const handleNoButton = (name) => {
+        setLoadingIndex(true);
+        let send = api.sendPost({friend: name, login: user.login}, 'friendshipNo', `Bearer ${user.token}`);
+        let buf = {...user};
+        send.then((res)=>{console.log(res); Object.assign(buf, res.data[0])});
+        
+        getInfoMessage('success','Данные отправлены', false);
     }
 
     return (
@@ -125,10 +140,32 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                 borderRadius: '50px',
                 boxShadow: 3,
                 backgroundColor: blueGrey[900],
-                width: '50%',
-                minWidth: '250px',
+                minWidth: '300px',
                 padding: '20px'
             }}>
+                {user.askToAdd&&(user.askToAdd.length!==0)&&<TableContainer sx={{ marginBottom: '50px' }}>
+                    <Table size="small" aria-label="a dense table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Вас хотят добавить в список друзей:</TableCell>
+                                <TableCell align="right"></TableCell>
+                                <TableCell align="right"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {user.askToAdd.map((row) => (
+                            <TableRow
+                            key={row}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell component="th" scope="row" sx={{ bottom: 0, bottomLeft: '16px' }}>{row}</TableCell>
+                                <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: green[500]}}><CheckIcon /></IconButton></TableCell>
+                                <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: red[500]}} onClick={((event)=>handleNoButton(row))}><CloseIcon /></IconButton></TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>}
                 <Typography variant="h5" gutterBottom>{user.friends.length!==0 ? 'Список друзей' : 'Друзей пока нет'}</Typography>
             </Box></Grow>
         </Box>

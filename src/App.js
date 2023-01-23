@@ -4,6 +4,7 @@ import './App.css';
 import { getInfoMessage, SetInfoMessageStateItems, setLoadingIndex } from './helpers/leftInfoWindow';
 import Menu from './helpers/menu';
 import Three from './helpers/Tree';
+import ThreeMin from './helpers/threeMin';
 import Loading from './helpers/loading';
 import SMess from './helpers/serviceMessage';
 import Login from './pages/Login';
@@ -17,6 +18,7 @@ import sendApi from './mech/api';
 import React, { useState, useEffect, useRef  } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import {isMobile} from 'react-device-detect';
 
 const api = new sendApi ('https://spamigor.site/api');
 
@@ -78,7 +80,8 @@ function App() {
   
   return (
     <div className="App">
-      <Three />
+      <div id="erer" ></div>
+      { !isMobile ? <Three /> : <ThreeMin /> }
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
       {loadingInd&&<Loading />}
       {state.login&&<header className="App-header">

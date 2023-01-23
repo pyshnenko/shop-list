@@ -74,8 +74,7 @@ export default function Profile({ user, api }) {
             
             <Grow in={true} {...({ timeout: 1000 })}><Box sx={styleS}>
                 <Box>
-                    <TextField onChange={({ target }) => handleInputF(target)} sx={{ width: '100%' }} label = 'Введи логин пользователя' />
-                    <Button>Поиск</Button>
+                    <TextField onChange={({ target }) => handleInputF(target)} sx={{ width: '100%', marginBottom: '20px' }} label = 'Введи логин пользователя' />
                 </Box>
                 {visUsList.length!==0&&<ButtonGroup
                     orientation="vertical"
