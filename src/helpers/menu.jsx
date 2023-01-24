@@ -1,5 +1,6 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import { grey } from '@mui/material/colors';
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -15,9 +16,25 @@ import Logout from '@mui/icons-material/Logout';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
 
-export default function AccountMenu({ user, setUser, state, setState }) {
+export default function AccountMenu({ user, setUser, state, setState, setRows }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
+  useEffect(() => {
+    const onKeypress = e => {
+        console.log(e.code);
+        if (e.code==='Escape') {
+          setAnchorEl(null);
+        }
+    };
+  
+    document.addEventListener('keydown', onKeypress);
+  
+    return () => {
+      document.removeEventListener('keydown', onKeypress);
+    };
+  }, []);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -29,6 +46,7 @@ export default function AccountMenu({ user, setUser, state, setState }) {
     if (ind==='exit') {
       setUser({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
       setState({login: false, state: ''});
+      setRows([]);
       localStorage.clear();
     }
     else if (ind==='lists') {
@@ -64,7 +82,9 @@ export default function AccountMenu({ user, setUser, state, setState }) {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}>{(user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
+            <Badge color="primary" variant="dot" invisible={!(user.askToAdd&&user.askToAdd.length!==0)}>
+              <Avatar sx={{ width: 32, height: 32 }}>{((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'ъ')).toLocaleUpperCase()}</Avatar>
+            </Badge>
           </IconButton>
         </Tooltip>
         <Typography sx={{ minWidth: 100 }}>{user.login}</Typography>
@@ -104,8 +124,8 @@ export default function AccountMenu({ user, setUser, state, setState }) {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
       >
-        <MenuItem onClick={(event)=> {handleMenuClick(event, 'profile')}}>
-          <Avatar /> Профиль
+        <MenuItem onClick={(event)=> {handleMenuClick(event, 'profile')}}>          
+          <Badge anchorOrigin={{ vertical: 'top', horizontal: 'left' }} color="primary" variant="dot" invisible={!(user.askToAdd&&user.askToAdd.length!==0)}><Avatar /></Badge> Профиль
         </MenuItem>
         <MenuItem onClick={(event)=> {handleMenuClick(event,'lists')}}>
           <InsertDriveFileIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Мои списки

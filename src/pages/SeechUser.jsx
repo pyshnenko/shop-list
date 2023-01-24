@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Box from '@mui/material/Box';
-import { blueGrey, green, grey, lightBlue, red, yellow } from '@mui/material/colors';
-import Avatar from '@mui/material/Avatar';
+import { blueGrey } from '@mui/material/colors';
 import Typography from '@mui/material/Typography';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import UsersCard from '../helpers/usersCard';
-import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 
-export default function Profile({ user, api }) { 
+export default function Profile({ user, setUser, api }) { 
 
-    const [ sLogin, setSLogin ] = useState('');
     const [ usList, setUsList ] = useState([]);
     const [ visUsList, setVisUsList ] = useState([]);
     const [ userS, setUserS ] = useState({visible: false});
@@ -41,10 +34,9 @@ export default function Profile({ user, api }) {
     }, [] )
 
     const handleInputF = (target) => {
-        setSLogin(target.value);
         if (target.value.length>2) {
             let buf = [];
-            usList.map((key)=>{ if ((key.login.toLocaleUpperCase().includes(target.value.toLocaleUpperCase()))&&(key.login!==user.login)) buf.push(key)});
+            usList.map((key)=>{ if ((key.login.toLocaleUpperCase().includes(target.value.toLocaleUpperCase()))&&(key.login!==user.login)) buf.push(key); return true});
             setVisUsList(buf);
         }
         else setVisUsList([]);
@@ -88,7 +80,7 @@ export default function Profile({ user, api }) {
             
             {userS.visible&&<Grow in={true} {...({ timeout: 1000 })}>
                 <Box sx={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <UsersCard user={userS} setUser={setUserS} api={api} />
+                    <UsersCard userS={userS} setUserS={setUserS} api={api} user={user} setUser={setUser} />
                 </Box>
             </Grow>}
         </Box>

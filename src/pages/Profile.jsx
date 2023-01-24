@@ -16,7 +16,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 
 export default function Profile({ user, setRows, setState, data, setData, setUser, api }) { 
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
@@ -60,7 +59,28 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
         let send = api.sendPost({friend: name, login: user.login}, 'friendshipNo', `Bearer ${user.token}`);
         let buf = {...user};
         send.then((res)=>{console.log(res); Object.assign(buf, res.data[0])});
-        
+        console.log(buf);
+        setUser(buf);
+        getInfoMessage('success','Данные отправлены', false);
+    }
+
+    const handleYesButton = (name) => {
+        setLoadingIndex(true);
+        let send = api.sendPost({friend: name, login: user.login}, 'friendshipStart', `Bearer ${user.token}`);
+        let buf = {...user};
+        send.then((res)=>{console.log(res); Object.assign(buf, res.data[0])});
+        console.log(buf);  
+        setUser(buf);      
+        getInfoMessage('success','Данные отправлены', false);
+    }
+
+    const handleDelButton = (name) => {
+        setLoadingIndex(true);
+        let send = api.sendPost({friend: name, login: user.login}, 'friendshipEnd', `Bearer ${user.token}`);
+        let buf = {...user};
+        send.then((res)=>{console.log(res); Object.assign(buf, res.data[0])});
+        console.log(buf);
+        setUser(buf);
         getInfoMessage('success','Данные отправлены', false);
     }
 
@@ -92,7 +112,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                         alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
                         src={user.avatar ? user.avatar : ''}
                         sx={{ width: 50, height: 50, backgroundColor: grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
-                    >{user.avatar ? '' : (user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
+                    >{user.avatar ? '' : ((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
                     <Typography variant="h5" gutterBottom>{user.role}</Typography>
                 </Box>
                 <Box sx={{ 
@@ -159,14 +179,35 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <TableCell component="th" scope="row" sx={{ bottom: 0, bottomLeft: '16px' }}>{row}</TableCell>
-                                <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: green[500]}}><CheckIcon /></IconButton></TableCell>
+                                <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: green[500]}} onClick={((event)=>handleYesButton(row))}><CheckIcon /></IconButton></TableCell>
                                 <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: red[500]}} onClick={((event)=>handleNoButton(row))}><CloseIcon /></IconButton></TableCell>
                             </TableRow>
                         ))}
                         </TableBody>
                     </Table>
                 </TableContainer>}
-                <Typography variant="h5" gutterBottom>{user.friends.length!==0 ? 'Список друзей' : 'Друзей пока нет'}</Typography>
+                <Typography variant="h5" gutterBottom>{user.friends.length===0&&'Друзей пока нет'}</Typography>
+                {user.askToAdd&&(user.friends.length!==0)&&<TableContainer>
+                    <Table size="small" aria-label="a dense table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Список ваших друзей</TableCell>
+                                <TableCell align="right"></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                        {user.friends.map((row) => (
+                            <TableRow
+                            key={row}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell component="th" scope="row" sx={{ bottom: 0, bottomLeft: '16px' }}>{row}</TableCell>
+                                <TableCell align="right" sx={{ bottom: 0 }}><IconButton sx={{color: red[500]}} onClick={((event)=>handleDelButton(row))}><CloseIcon /></IconButton></TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>}
             </Box></Grow>
         </Box>
     )

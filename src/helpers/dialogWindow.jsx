@@ -9,13 +9,21 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Grow from '@mui/material/Grow';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Checkbox from '@mui/material/Checkbox';
 
 export default function DWindow({ editedLists, setEditedLists, open, setOpen, rows, setRows, user}) {
 
     const [ newName, setNewName ] = useState(rows[open.list].name);
     const [ newAcc, setNewAcc ] = useState(rows[open.list].access || 'me');
     const [ newAccUsers, setNewAccUsers ] = useState(rows[open.list].accessUsers || []);
-
+    const [ checked, setChecked ] = useState(rows[open.list].accessUsers || []);
+    
     useEffect(() => {
         const onKeypress = e => {
             console.log(e.code);
@@ -55,14 +63,29 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
 
     const handleChange = (event) => {
         setNewAcc(event.target.value);
-        let buf = [user.friends];
-        buf.push(user.login);
+        console.log(checked);
         if (event.target.value==='all') setNewAccUsers([]);
         else if (event.target.value==='me') setNewAccUsers([user.login]);
-        else if (event.target.value==='friends') setNewAccUsers(buf);
+        else if (event.target.value==='friends') {
+            let buf = copy(user.friends);
+            buf.push(user.login);
+            setNewAccUsers(buf);
+        }
+        else if (event.target.value==='users') {
+            let buf = copy(checked);
+            buf.push(user.login);
+            console.log(buf)
+            setNewAccUsers(buf);
+        }
         console.log(event.target.value);
-        console.log(user)
     };
+
+    const handleCheck = (name) => {
+        let buf = copy(checked);
+        if (checked.includes(name)) buf.splice(buf.indexOf(name),1);
+        else buf.push(name);
+        setChecked(buf);
+    }
 
     return (
         <Grow in={true}><Box
@@ -133,7 +156,28 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
                     boxShadow: '0 0 10px',
                     borderRadius: '50px'
                 }}>
-
+                <TableContainer sx={{ marginBottom: '50px' }}>
+                    <Table size="small" aria-label="a dense table">
+                        <TableBody>
+                        {user.friends.map((row) => (
+                            <TableRow
+                            key={row}
+                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell padding="checkbox">
+                                    <Checkbox
+                                        sx = {{ zoom: 1.3 }}
+                                        color="primary"
+                                        checked={checked.includes(row)}
+                                        onClick={(event) => handleCheck(row)}
+                                    />
+                                </TableCell>
+                                <TableCell component="th" scope="row" sx={{ bottom: 0, bottomLeft: '16px' }}>{row}</TableCell>
+                            </TableRow>
+                        ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </Box>}
         </Box></Grow>
     )

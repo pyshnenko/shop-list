@@ -13,7 +13,7 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
         setLoadingIndex(true);
         console.log(user.token);
         setVisibleWindowNewRow(false);
-        let bbb = await api.sendPost({name: name, author: user.first_name || user.login, data: [], access: 'me', accessUsers: [user.login]}, 'setList', `Bearer ${user.token}`);
+        let bbb = await api.sendPost({name: name, author: user.name || user.login, data: [], access: 'me', accessUsers: [user.login]}, 'setList', `Bearer ${user.token}`);
         console.log(bbb);
         setRows(bbb.data.list);
         console.log(bbb.data.list);

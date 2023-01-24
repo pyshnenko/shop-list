@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
-import { blueGrey, green, grey, lightBlue, red, yellow } from '@mui/material/colors';
+import { blueGrey, green, grey, lightBlue, red } from '@mui/material/colors';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
-import Grow from '@mui/material/Grow';
 
-export default function UsersCard({ user, setUser, api }) { 
+export default function UsersCard({ userS, setUserS, api, user, setUser }) { 
+    
+    useEffect(() => {
+        const onKeypress = e => {
+            console.log(e.code);
+            if (e.code==='Escape') {
+                setUserS({visible: false});
+            }
+        };
+      
+        document.addEventListener('keydown', onKeypress);
+      
+        return () => {
+          document.removeEventListener('keydown', onKeypress);
+        };
+    }, []);
+
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
     const textFields = [ 
         {text: 'Логин:', index: 'login'}, 
@@ -21,20 +34,39 @@ export default function UsersCard({ user, setUser, api }) {
         {text: 'Отчество:', index: 'first_name'}, 
         {text: 'Почта:', index: 'email'}, 
         {text: 'telegram:', index: 'telegram'} 
-    ]
-    console.log(user)
+    ];
 
     const handleAddFriend = () => {
         setLoadingIndex(true);
-        let res = api.sendPost({login: user.login}, 'askToAdd', `Bearer ${user.token}`);
+        let res = api.sendPost({login: userS.login}, 'askToAdd', `Bearer ${userS.token}`);
         res.then((result)=>{
             console.log(result);
             getInfoMessage(result.status===200 ? 'success' : 'error', result.status===200 ? 'Запрос отправлен' : 'Что-то пошло не так', false);
+            if (result.status===200) {
+                let buf = {...userS};
+                buf.asked=true;
+                setUserS(buf);
+            }
         })
     }
 
     const handleDelFriend = () => {
-        console.log('im here')
+        console.log(userS.token);
+        setLoadingIndex(true);
+        let send = api.sendPost({friend: userS.login}, 'friendshipEnd', `Bearer ${userS.token}`);
+        let buf = {...userS};
+        send.then((res)=>{
+            console.log(res);
+            if (res.status===200) {
+                buf.friend=false;
+                setUserS(buf);
+                buf={...user};
+                buf.friends.splice(buf.friends.indexOf(userS.login), 1);
+                setUser(buf);
+                getInfoMessage('success','Данные отправлены', false);
+            }
+            else getInfoMessage('error','Что-то пошло не так', false);
+        });
     }
 
     return (
@@ -64,18 +96,18 @@ export default function UsersCard({ user, setUser, api }) {
                 opacity: '1',
                 zIndex: 11
             }}>
-                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}><IconButton sx={{ position: 'fixed' }} onClick={(event=>setUser({visible: false}))} ><CloseIcon /></IconButton></Box>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}><IconButton sx={{ position: 'fixed' }} onClick={(event=>setUserS({visible: false}))} ><CloseIcon /></IconButton></Box>
                 <Box>
                     <Avatar
-                        alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
-                        src={user.avatar ? user.avatar : ''}
+                        alt={(userS.first_name+' '+userS.last_name).toLocaleUpperCase()}
+                        src={userS.avatar ? userS.avatar : ''}
                         sx={{ width: 50, height: 50, backgroundColor: grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
-                    >{user.avatar ? '' : (user.name[0]+user.last_name[0]).toLocaleUpperCase()}</Avatar>
-                    <Typography variant="h5" gutterBottom>{user.role}</Typography>
-                    {user.asked&&<Typography sx={{ fontSize: 'medium', marginTop: '20px', color: 'cadetblue' }} variant="h5" gutterBottom>Ожидаем ответ</Typography>}
-                    {user.friend&&<Typography variant="h5" gutterBottom>Ваш друг</Typography>}
-                    {user.friend&&<Button onClick={(event)=>handleDelFriend()}>Удалить из друзей</Button>}
-                    {(!user.asked)&&(!user.friend)&&<Button onClick={(event)=>handleAddFriend()}>Добавить в друзья</Button>}
+                    >{userS.avatar ? '' : ((userS.name ? userS.name[0] : 'Ъ')+(userS.last_name ? userS.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
+                    <Typography variant="h5" gutterBottom>{userS.role}</Typography>
+                    {userS.asked&&<Typography sx={{ fontSize: 'medium', marginTop: '20px', color: 'cadetblue' }} variant="h5" gutterBottom>Ожидаем ответ</Typography>}
+                    {userS.friend&&<Typography variant="h5" gutterBottom>Ваш друг</Typography>}
+                    {userS.friend&&<Button onClick={(event)=>handleDelFriend()}>Удалить из друзей</Button>}
+                    {(!userS.asked)&&(!userS.friend)&&<Button onClick={(event)=>handleAddFriend()}>Добавить в друзья</Button>}
                 </Box>
                 <Box sx={{ 
                     display: 'flex',
@@ -90,9 +122,9 @@ export default function UsersCard({ user, setUser, api }) {
                         <Box key={dat.index} sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                             <Box sx={styleText.central}>
                                 {<Typography sx={styleText.name} variant="h5" gutterBottom>{dat.text}</Typography>}
-                                {<Typography sx={styleText.text} variant="h5" gutterBottom>{user[dat.index]}</Typography>}
-                                {dat.index==='email'&&user.emailValid&&<CheckIcon sx={{ color: green[500]}} />}
-                                {dat.index==='email'&&(!user.emailValid)&&<CloseIcon sx={{ color: red[500]}} />}
+                                {<Typography sx={styleText.text} variant="h5" gutterBottom>{userS[dat.index]}</Typography>}
+                                {dat.index==='email'&&userS.emailValid&&<CheckIcon sx={{ color: green[500]}} />}
+                                {dat.index==='email'&&(!userS.emailValid)&&<CloseIcon sx={{ color: red[500]}} />}
                             </Box>
                         </Box>
                     )})}

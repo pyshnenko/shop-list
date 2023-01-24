@@ -73,7 +73,6 @@ function App() {
   }, [])
 
   useEffect(() => {
-    console.log(state);
     if (state.login) localStorage.setItem('state', JSON.stringify(state))
     if ((state.login)&&(state.state==='')) setState({login: true, state: 'centralPage'})
   }, [state]);
@@ -102,7 +101,7 @@ function App() {
             {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} api={api} /> }
+            {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
           </div>
         </div>
         <div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>

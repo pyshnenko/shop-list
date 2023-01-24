@@ -97,7 +97,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
   };
 
   const handleChangePage = (event, newPage, list) => {
-    console.log(list);
     let bList = copy(page);
     bList[list]=newPage
     setPage(bList);
@@ -147,14 +146,11 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
     }
 
   const handleListEdit = (evt, list) => {
-    setOpen({ list: list, visible: true, text: '' })
-    console.log(list);
+    setOpen({ list: list, visible: true, text: '' });
   }
 
   const handleListDelete = (evt, list) => {
     setLoadingIndex(true);
-    console.log(list);
-    console.log(`id: ${rows[list].id}`);
     let id = Number(rows[list].id);
     api.sendPost({id: id}, 'delList', `Bearer ${user.token}`)
       .then(()=>{        
@@ -190,7 +186,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
           key={data.name+list}
           sx={{ display: 'flex', justifyContent: 'center' }}
         >
-          {console.log(data)}
           <Typography>{`${data.name} - ${data.author} - ID: ${data.id}`}</Typography>
           {mode.edit&&<Box sx={{ margin: 0, padding: 0}}>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
