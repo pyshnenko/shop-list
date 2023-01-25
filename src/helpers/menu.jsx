@@ -69,6 +69,11 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
       sState.state='addfriend';
       setState(sState)
     }
+    else if (ind==='settings') {
+      let sState={...state};
+      sState.state='settings';
+      setState(sState)
+    }
   };
   return (
     <React.Fragment>
@@ -83,7 +88,11 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
             aria-expanded={open ? 'true' : undefined}
           >
             <Badge color="primary" variant="dot" invisible={!(user.askToAdd&&user.askToAdd.length!==0)}>
-              <Avatar sx={{ width: 32, height: 32 }}>{((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'ъ')).toLocaleUpperCase()}</Avatar>
+              <Avatar
+                alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
+                src={user.avatar ? user.avatar : ''}
+                sx={{ width: 32, height: 32 }}
+              >{user.avatar ? '' : ((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
             </Badge>
           </IconButton>
         </Tooltip>

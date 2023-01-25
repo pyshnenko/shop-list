@@ -84,6 +84,26 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
         getInfoMessage('success','Данные отправлены', false);
     }
 
+    const handleClick = async (event) => {
+        setLoadingIndex(true);
+        let data = new FormData();
+        data.append('file', event.target.files[0]);
+        const options = {
+            method: 'POST',
+            headers: {
+                login: user.login,
+                fname: event.target.files[0].name
+            },
+            body: data,
+        }
+        const response = await fetch('https://spamigor.site/apiUpload', options);
+        const res = await response.json();        
+        let result = await api.sendPost({avatar: `https://spamigor.site/${res.addr}`}, 'updUserData', `Bearer ${user.token}`);
+        console.log(result.data.data[0]);
+        setUser(result.data.data[0]);
+        getInfoMessage('success','Данные отправлены', false);
+    }
+
     return (
         <Box sx={{
             width: '100%',
@@ -108,11 +128,14 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                 padding: '20px'
             }}>
                 <Box>
-                    <Avatar
-                        alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
-                        src={user.avatar ? user.avatar : ''}
-                        sx={{ width: 50, height: 50, backgroundColor: grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
-                    >{user.avatar ? '' : ((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
+                    <IconButton color="primary" aria-label="upload picture" component="label">
+                        <input hidden accept="image/*" type="file" onChange={handleClick} />
+                        <Avatar
+                            alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
+                            src={user.avatar ? user.avatar : ''}
+                            sx={{ width: 50, height: 50, backgroundColor: user.avatar ? blueGrey[900] : grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
+                        >{user.avatar ? '' : ((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
+                    </IconButton>                    
                     <Typography variant="h5" gutterBottom>{user.role}</Typography>
                 </Box>
                 <Box sx={{ 

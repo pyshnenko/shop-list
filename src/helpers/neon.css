@@ -80,7 +80,7 @@
 }
 
 #three {
-    animation: startS 10s linear;
+    /*animation: startS 10s linear;*/
 }
 
 @keyframes startS {

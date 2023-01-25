@@ -12,6 +12,7 @@ import UnLogin from './pages/UnLogin';
 import Registation from './pages/Register';
 import CPage from './pages/CPage';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import SeechUser from './pages/SeechUser';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
@@ -80,7 +81,7 @@ function App() {
   return (
     <div className="App">
       <div id="erer" ></div>
-      { !isMobile ? <Three /> : <ThreeMin /> }
+      { isMobile ? null : (user?.settings?.animation===1 ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
       {loadingInd&&<Loading />}
       {state.login&&<header className="App-header">
@@ -102,6 +103,7 @@ function App() {
             {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
+            {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
           </div>
         </div>
         <div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>

@@ -26,6 +26,7 @@ import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
+import {isMobile} from 'react-device-detect';
 
 const headCells = [
   {
@@ -192,8 +193,8 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
           </Box>}
         </AccordionSummary>
-        <AccordionDetails sx={{ boxShadow: 3 }}>
-          <Box sx={{ margin: '10px', boxShadow: 3 }}>
+        <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
+          <Box sx={{ margin: (isMobile)?0:'10px', boxShadow: 3 }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
               <TableContainer>
                 <Table

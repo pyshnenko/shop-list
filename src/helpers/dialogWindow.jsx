@@ -22,11 +22,9 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
     const [ newName, setNewName ] = useState(rows[open.list].name);
     const [ newAcc, setNewAcc ] = useState(rows[open.list].access || 'me');
     const [ newAccUsers, setNewAccUsers ] = useState(rows[open.list].accessUsers || []);
-    const [ checked, setChecked ] = useState(rows[open.list].accessUsers || []);
     
     useEffect(() => {
         const onKeypress = e => {
-            console.log(e.code);
             if (e.code==='Escape') {
                 handleClose();
             }
@@ -48,6 +46,7 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
 
     const handleListNameEdit = (event) => {
         console.log('push');
+        console.log(newAccUsers);
         let row = copy(rows);
         row[open.list].name=newName;
         row[open.list].access=newAcc;
@@ -63,7 +62,6 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
 
     const handleChange = (event) => {
         setNewAcc(event.target.value);
-        console.log(checked);
         if (event.target.value==='all') setNewAccUsers([]);
         else if (event.target.value==='me') setNewAccUsers([user.login]);
         else if (event.target.value==='friends') {
@@ -72,8 +70,8 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
             setNewAccUsers(buf);
         }
         else if (event.target.value==='users') {
-            let buf = copy(checked);
-            buf.push(user.login);
+            let buf = copy(newAccUsers);
+            if (!buf.includes(user.login)) buf.push(user.login);
             console.log(buf)
             setNewAccUsers(buf);
         }
@@ -81,10 +79,10 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
     };
 
     const handleCheck = (name) => {
-        let buf = copy(checked);
-        if (checked.includes(name)) buf.splice(buf.indexOf(name),1);
+        let buf = copy(newAccUsers);
+        if (buf.includes(name)) buf.splice(buf.indexOf(name),1);
         else buf.push(name);
-        setChecked(buf);
+        setNewAccUsers(buf);
     }
 
     return (
@@ -168,7 +166,7 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
                                     <Checkbox
                                         sx = {{ zoom: 1.3 }}
                                         color="primary"
-                                        checked={checked.includes(row)}
+                                        checked={newAccUsers.includes(row)}
                                         onClick={(event) => handleCheck(row)}
                                     />
                                 </TableCell>
