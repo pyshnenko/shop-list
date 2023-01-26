@@ -7,10 +7,6 @@ export default class sendApi {
     }
 
     async sendPost(obj, make, token) {
-        console.log('post');
-        console.log(obj);
-        console.log(make);
-        console.log(token);
             try {
                 const jsonHeader = {
                     "Content-type": "application/json",

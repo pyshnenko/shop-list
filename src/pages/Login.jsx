@@ -37,7 +37,7 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
             setState({login: true, state: 'centralPage'});
             setLabel({log: 'Логин', pass: 'Пароль'});
             getInfoMessage('success', 'Данные получены', false);
-            localStorage.setItem('token', answ.data.data[0].token)
+            if (rdata?.settings?.localSave) localStorage.setItem('listToken', answ.data.data[0].token)
         }
     }
 

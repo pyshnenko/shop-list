@@ -31,7 +31,6 @@ const darkTheme = createTheme({
 
 function App() {
 
-  const [ mode, setMode ] = useState({ edit: false, autosave: false })
   const [ state, setState ] = useState({login: false, state: ''});
   const [ data, setData ] = useState({log: '', pass: ''});
   const [ user, setUser ] = useState({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
@@ -42,12 +41,17 @@ function App() {
 
   SetInfoMessageStateItems(openNewRowWindow, setOpenNewRowWindow, loadingInd, setLoadingInd);
 
+  useEffect(() => {
+    document.title = 'Список покупок';
+    document.documentElement.setAttribute('lang', 'ru')
+  }, []);
+
   useEffect(()=> {
     if (trigger.current) {
       trigger.current = false;
-      if ((localStorage.token)&&(!state.login)) {      
+      if ((localStorage.listToken)&&(!state.login)) {      
         setLoadingIndex(true);
-        const answ = api.sendPost({}, 'login', `Bearer ${localStorage.token}`);
+        const answ = api.sendPost({}, 'login', `Bearer ${localStorage.listToken}`);
         answ.then((res)=>{
           if (res?.status!==200) {
             localStorage.clear();
@@ -63,8 +67,8 @@ function App() {
                 setRows(lists.data.lists);
                 setState({login: true, state: 'centralPage'});
                 getInfoMessage('success', 'Данные получены', false)
-                localStorage.setItem('token', res.data.token);
-                if (localStorage.state) setState(JSON.parse(localStorage.state))
+                if (res.data.data[0]?.settings?.localSave) localStorage.setItem('listToken', res.data.token);
+                if (localStorage.listState) setState(JSON.parse(localStorage.listState))
               }
             })
           }
@@ -74,7 +78,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (state.login) localStorage.setItem('state', JSON.stringify(state))
+    if ((state.login)&&(user?.settings?.pageSave)) localStorage.setItem('listState', JSON.stringify(state))
     if ((state.login)&&(state.state==='')) setState({login: true, state: 'centralPage'})
   }, [state]);
   
@@ -100,8 +104,8 @@ function App() {
             {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} mode={mode} setMode={setMode} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+            {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+            {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
           </div>

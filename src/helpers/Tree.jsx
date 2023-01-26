@@ -6,7 +6,6 @@ export default function Three() {
 
   useEffect(()=> {
     
-    console.log(isMobile)
     const pc = particlesCursor({
       el: document.getElementById('three'),
       gpgpuSize: 256,

@@ -70,7 +70,7 @@ export default function Profile({ user, setUser, api }) {
 
     return (
         <Box>
-            <Grow in={true}>
+            <Grow in={true} appear={user.settings.grow}>
                 <Box sx={backStyle}>
                     <FormControl component="fieldset" variant="standard">
                         <FormLabel component="legend">Настройки анимации</FormLabel>
@@ -115,7 +115,7 @@ export default function Profile({ user, setUser, api }) {
                     </FormControl>
                 </Box>
             </Grow>
-            <Grow in={true} {...({ timeout: 1000 })}>
+            <Grow in={true} {...({ timeout: 1000 })} appear={user.settings.grow}>
                 <Box sx={backStyle}>
                     <FormControl sx={{ m: 1, width: 300 }}>
                         <InputLabel>Задний фон</InputLabel>
@@ -138,13 +138,12 @@ export default function Profile({ user, setUser, api }) {
                         >
                             <MenuItem value={'me'}>Только я</MenuItem>
                             <MenuItem value={'friends'}>Друзья</MenuItem>
-                            <MenuItem value={'users'}>Некоторые друзья</MenuItem>
                             <MenuItem value={'all'}>Все</MenuItem>
                         </Select>
                     </FormControl>
                 </Box>
             </Grow>
-            <Grow in={true} {...({ timeout: 2000 })}>                
+            <Grow in={true} {...({ timeout: 2000 })} appear={user.settings.grow}>                
                 <Button variant="contained" onClick={saved}>
                     Сохранить
                 </Button>

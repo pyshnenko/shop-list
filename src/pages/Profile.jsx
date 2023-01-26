@@ -111,7 +111,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
             flexDirection: 'column',
             justifyContent: 'space-evenly',
             alignItems: 'center',
-        }}><Grow in={true}>
+        }}><Grow in={true} appear={user.settings.grow}>
             <Box sx={{
                 borderRadius: '50px',
                 boxShadow: 3,
@@ -133,7 +133,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                         <Avatar
                             alt={(user.first_name+' '+user.last_name).toLocaleUpperCase()}
                             src={user.avatar ? user.avatar : ''}
-                            sx={{ width: 50, height: 50, backgroundColor: user.avatar ? blueGrey[900] : grey[200], color: grey[800], fontSize: 'x-large', zoom: 3 }}
+                            sx={{ width: 50, height: 50, backgroundColor: user.avatar ? blueGrey[900] : grey[200], color: grey[800], fontSize: 'x-large', zoom: 3, boxShadow: '0 0 4px gainsboro' }}
                         >{user.avatar ? '' : ((user.name ? user.name[0] : 'ъ')+(user.last_name ? user.last_name[0] : 'Ъ')).toLocaleUpperCase()}</Avatar>
                     </IconButton>                    
                     <Typography variant="h5" gutterBottom>{user.role}</Typography>
@@ -177,7 +177,7 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
             </Box></Grow>
             <Grow
             in={true}
-                {...({ timeout: 1000 })}
+                {...({ timeout: 1000 })} appear={user.settings.grow}
             >
             <Box sx={{
                 borderRadius: '50px',

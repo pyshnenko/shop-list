@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import copy from 'fast-copy';
 import Box from '@mui/material/Box';
 import { blueGrey } from '@mui/material/colors';
@@ -6,14 +6,47 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
+import {isMobile} from 'react-device-detect';
 
 export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEditedLists, api, rows, setRows, user }) {
-    const [ name, setName ] = React.useState('')
+    const [ name, setName ] = React.useState('');
+
+    useEffect(() => {
+        const onKeypress = e => {
+            if (e.code==='Escape') {
+                handleClosed();
+            }
+            else if (e.code==='Enter') {
+                if (name!=='') handleEnter();
+            }
+        };
+      
+        if (!isMobile) document.addEventListener('keydown', onKeypress);
+      
+        return () => {
+            if (!isMobile) document.removeEventListener('keydown', onKeypress);
+        };
+    }, []);
+
+    const accUsList = (shMode) => {
+        let buf = [];
+        if (!shMode||(shMode==='me')) buf.push(user.login);
+        else if (shMode==='friends') {
+            buf = user.friends;
+            buf.push(user.login);
+        }
+        return buf; 
+    }
+
     const handleEnter = async (evt) => {
         setLoadingIndex(true);
         console.log(user.token);
         setVisibleWindowNewRow(false);
-        let bbb = await api.sendPost({name: name, author: user.name || user.login, data: [], access: 'me', accessUsers: [user.login]}, 'setList', `Bearer ${user.token}`);
+        let acc = user?.settings?.sharedMode ? user?.settings?.sharedMode : 'me';
+        console.log(acc);
+        let accU = await accUsList(user?.settings?.sharedMode ? user?.settings?.sharedMode : 'me');
+        console.log(accU);
+        let bbb = await api.sendPost({name: name, author: user.name || user.login, data: [], access: 'friends', accessUsers: ['anton1', 'igor', 'spamigor']}, 'setList', `Bearer ${user.token}`);
         console.log(bbb);
         setRows(bbb.data.list);
         console.log(bbb.data.list);
@@ -29,7 +62,7 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
 
     return (
         <div>
-            <Grow in={true}><Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Grow in={true} appear={user.settings.grow}><Box sx={{ display: 'flex', justifyContent: 'center' }}>
                 <Box sx={{ bgcolor: blueGrey[900], padding: '40px',
                     position: 'fixed', top: '40vh', zIndex: '9999', boxShadow: 3, borderRadius: '50px' }}>
                     <TextField sx={{ width: '300px', boxShadow: 3, bgcolor: blueGrey[800] }} 

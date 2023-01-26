@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import copy from 'fast-copy';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -69,7 +69,7 @@ function EnhancedTableHead() {
   );
 }
 
-export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, setMode }) {
+export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser }) {
 
   const arrGen = (length) => {
     let buf = [];
@@ -84,6 +84,9 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
   //const [opent, setOpent] = useState('');
   const [ editedLists, setEditedLists] = useState([]);
+
+  const timer = useRef();
+  const trigUnload = useRef(true);
 
   const handleClick = (event, list, index) => {
     const rIndex = index + (page[list] * rowsPerPage);
@@ -179,7 +182,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
       {visibleWindowNewRow&&<NewRowsTab setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {rows.map((data, list)=>{ return (
-      <Grow in={true} {...({ timeout: 1000 * list })} key={data.name+list}><Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
+      <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={data.name+list}><Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
@@ -188,7 +191,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
           sx={{ display: 'flex', justifyContent: 'center' }}
         >
           <Typography>{`${data.name} - ${data.author} - ID: ${data.id}`}</Typography>
-          {mode.edit&&<Box sx={{ margin: 0, padding: 0}}>
+          {user.settings.edit&&<Box sx={{ margin: 0, padding: 0}}>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
             <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
           </Box>}
@@ -277,7 +280,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, mode, se
         </AccordionDetails>    
       </Accordion></Grow>
       )})}
-      <DButton api={api} mode={mode} setMode={setMode} rows={rows} user={user} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} />
+      <DButton trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
     </div>
   );
 }

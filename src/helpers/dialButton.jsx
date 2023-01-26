@@ -21,9 +21,32 @@ const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
     },
   }));
 
-export default function SMess({api, mode, setMode, rows, user, setVisibleWindowNewRow, editedLists }) {
+export default function SMess({timer, trigUnload, api, rows, user, setUser, setVisibleWindowNewRow, editedLists, setEditedLists }) {
     const [height, setHeight] = useState(window.innerHeight);
     const [width, setWidth] = useState(window.innerWidth);
+
+    /*useEffect(()=>{
+        if (trigUnload.current) {
+            trigUnload.current=false;
+            document.addEventListener('unload', handleDialClick({}, 'save'));
+          
+            return () => {
+                document.removeEventListener('unload', handleDialClick({}, 'save'));
+            };
+        }
+    }, []);*/
+
+    useEffect(() => {
+        let d = Math.random() *100;
+        if (timer.current) {
+          console.log('clear')
+          clearTimeout(timer.current);
+        }
+        if (user?.settings?.autosave) 
+            timer.current = setTimeout(()=> {
+                if (editedLists.length) handleDialClick({}, 'save');
+            }, 30000)
+    }, [rows])
 
     useEffect(() => {
       const handleResize = (event) => {
@@ -47,21 +70,21 @@ export default function SMess({api, mode, setMode, rows, user, setVisibleWindowN
 
     const actions = [
         { icon: <SaveIcon />, name: 'Сохранить', mode: 'save' },
-        { icon: mode.edit ? <ModeEditOutlineOutlinedIcon /> : <EditOffOutlinedIcon />, name: 'Редактировать', mode: mode.edit ? 'edit' : 'notedit' },
+        { icon: user?.settings?.edit ? <ModeEditOutlineOutlinedIcon /> : <EditOffOutlinedIcon />, name: 'Редактировать', mode: user?.settings?.edit ? 'edit' : 'notedit' },
         { icon: <SpeedDialIcon />, name: 'Создать', mode: 'create' },
     ];
 
     const handleDialClick = async (evt, name) => {
         console.log(name)
         if (name==='notedit') {
-            let buf = {...mode}
-            buf.edit=true;
-            setMode(buf)
+            let buf = {...user}
+            buf.settings.edit=true;
+            setUser(buf)
         }
         if (name==='edit') {
-            let buf = {...mode}
-            buf.edit=false;
-            setMode(buf)
+            let buf = {...user}
+            buf.settings.edit=false;
+            setUser(buf)
         }
         if (name==='create') {
           setVisibleWindowNewRow(true);
@@ -74,9 +97,9 @@ export default function SMess({api, mode, setMode, rows, user, setVisibleWindowN
             console.log(editedLists);
             for (let i=0; i<editedLists.length; i++)
                 console.log(await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`));
+            setEditedLists([]);
             setLoadingIndex(false);
         }
-        console.log(mode)
       }
     
     return (

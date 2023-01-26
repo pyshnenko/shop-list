@@ -22,7 +22,6 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
 
   useEffect(() => {
     const onKeypress = e => {
-        console.log(e.code);
         if (e.code==='Escape') {
           setAnchorEl(null);
         }

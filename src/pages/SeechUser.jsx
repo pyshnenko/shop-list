@@ -60,11 +60,11 @@ export default function Profile({ user, setUser, api }) {
             alignItems: 'center',
         }}>
             
-            <Grow in={true}><Box sx={styleS}>
+            <Grow in={true} appear={user.settings.grow}><Box sx={styleS}>
                 <Typography variant="h5" gutterBottom>{user.friends.length!==0 ? 'Список друзей' : 'Друзей пока нет'}</Typography>
             </Box></Grow>
             
-            <Grow in={true} {...({ timeout: 1000 })}><Box sx={styleS}>
+            <Grow in={true} {...({ timeout: 1000 })} appear={user.settings.grow}><Box sx={styleS}>
                 <Box>
                     <TextField onChange={({ target }) => handleInputF(target)} sx={{ width: '100%', marginBottom: '20px' }} label = 'Введи логин пользователя' />
                 </Box>
@@ -74,11 +74,11 @@ export default function Profile({ user, setUser, api }) {
                     variant="contained"
                 >
                     {visUsList.map((key, index)=>(
-                            <Grow in={true} {...({ timeout: 1000*index })} key={key.login}><Button sx={{ width: '200px' }} key={key.login} onClick={(event)=>handleSeechClick(key)}>{key.login}</Button></Grow>))}
+                            <Grow in={true} {...({ timeout: 1000*index })} key={key.login} appear={user.settings.grow}><Button sx={{ width: '200px' }} key={key.login} onClick={(event)=>handleSeechClick(key)}>{key.login}</Button></Grow>))}
                 </ButtonGroup>}
             </Box></Grow>
             
-            {userS.visible&&<Grow in={true} {...({ timeout: 1000 })}>
+            {userS.visible&&<Grow in={true} {...({ timeout: 1000 })} appear={user.settings.grow}>
                 <Box sx={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <UsersCard userS={userS} setUserS={setUserS} api={api} user={user} setUser={setUser} />
                 </Box>

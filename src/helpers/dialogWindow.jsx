@@ -22,6 +22,29 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
     const [ newName, setNewName ] = useState(rows[open.list].name);
     const [ newAcc, setNewAcc ] = useState(rows[open.list].access || 'me');
     const [ newAccUsers, setNewAccUsers ] = useState(rows[open.list].accessUsers || []);
+
+    const [height, setHeight] = useState(window.innerHeight);
+    const [width, setWidth] = useState(window.innerWidth);
+
+    useEffect(() => {
+      const handleResize = (event) => {
+        setWidth(event.target.innerWidth);
+      };
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }, []);
+  
+    useEffect(() => {
+      const handleResize = (event) => {
+        setHeight(event.target.innerHeight);
+      };
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }, []);
     
     useEffect(() => {
         const onKeypress = e => {
@@ -86,7 +109,7 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
     }
 
     return (
-        <Grow in={true}><Box
+        <Grow in={true} appear={user?.settings?.grow}><Box
             sx={{ 
                 position: 'fixed',
                 left: 0,
@@ -96,8 +119,8 @@ export default function DWindow({ editedLists, setEditedLists, open, setOpen, ro
                 height: '100vh',
                 width: '100%',
                 alignItems: 'center',
-                justifyContent: 'center',
-
+                flexDirection: width>height ? 'row' : 'column',
+                justifyContent: width>height ? 'center' : 'flex-start'
             }}>
             <Box sx={{ 
                     backgroundColor: 'black',
