@@ -111,6 +111,24 @@ export default function Profile({ user, setUser, api }) {
                             }
                             label="Сохранение данных на этом ПК"
                             />
+                            <FormControlLabel
+                            control={
+                                <Switch checked={newSet?.neonLogo} onChange={handleChange} name="neonLogo" />
+                            }
+                            label="Логотип"
+                            />
+                            <FormControlLabel
+                            control={
+                                <Switch checked={newSet?.mobileAnimation} onChange={handleChange} name="mobileAnimation" />
+                            }
+                            label="Анимация на мобильных устройствах"
+                            />
+                            <FormControlLabel
+                            control={
+                                <Switch checked={newSet?.mobileLogo} onChange={handleChange} name="mobileLogo" />
+                            }
+                            label="Логотип на мобильных устройствах"
+                            />
                         </FormGroup>
                     </FormControl>
                 </Box>

@@ -27,6 +27,8 @@ import DWindow from '../helpers/dialogWindow';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import {isMobile} from 'react-device-detect';
+import DelWindow from '../helpers/deleteDialog';
+import FormControl from '@mui/material/FormControl';
 
 const headCells = [
   {
@@ -77,16 +79,34 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     return buf;
   }
 
+  const arrGen2 = (length) => {
+    let buf = [];
+    for (let i=0; i<length; i++) buf.push({ name: '', total: '' });
+    return buf;
+  }
+
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
-  const [newRow, setNewRow] = useState({ name: '', total: '' });
+  const [newRow, setNewRow] = useState(arrGen2(rows.length));
   const [ visibleWindowNewRow, setVisibleWindowNewRow ] = useState(false);
   const [open, setOpen] = useState({list: 0, visible: false, text: ''});
   //const [opent, setOpent] = useState('');
   const [ editedLists, setEditedLists] = useState([]);
+  const [openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0});
+  const [width, setWidth] = useState(window.innerWidth);
 
   const timer = useRef();
-  const trigUnload = useRef(true);
+  const trigUnload = useRef(true);  
+
+  useEffect(() => {
+    const handleResize = (event) => {
+      setWidth(event.target.innerWidth);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   const handleClick = (event, list, index) => {
     const rIndex = index + (page[list] * rowsPerPage);
@@ -133,11 +153,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   }
 
     const addButton = (evt, list) => {
-        if ((newRow.name!=='')&&(newRow.total!=='')) {
+        if ((newRow[list].name!=='')&&(newRow[list].total!=='')) {
             let buf = copy(rows);
-            buf[list].data.push({name: newRow.name, total: newRow.total, del: 0, selected: false});
+            buf[list].data.push({name: newRow[list].name, total: newRow[list].total, del: 0, selected: false});
             setRows(buf);
-            setNewRow({name: '', total: '' });
+            let buf2 = copy(newRow);
+            buf2[list]={name: '', total: '' }
+            setNewRow(buf2);
             let bPage = copy(page);
             bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
             setPage(bPage);
@@ -152,6 +174,18 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const handleListEdit = (evt, list) => {
     setOpen({ list: list, visible: true, text: '' });
   }
+
+  const handleListDeleteBefore = (evt, list) => {
+    if (!user?.settings?.askToDel) handleListDelete(evt, list);
+    else setOpenDelW({visible: true, result: false, answer: false, list: list})
+  }
+
+  useEffect (()=>{
+    if (openDelW.answer) {
+      if (openDelW.result) handleListDelete({}, openDelW.list);
+      setOpenDelW({visible: false, result: false, answer: false, list: 0})
+    }
+  }, [openDelW])
 
   const handleListDelete = (evt, list) => {
     setLoadingIndex(true);
@@ -181,6 +215,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     <div>
       {visibleWindowNewRow&&<NewRowsTab setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
+      {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
       {rows.map((data, list)=>{ return (
       <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={data.name+list}><Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
         <AccordionSummary
@@ -190,10 +225,14 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
           key={data.name+list}
           sx={{ display: 'flex', justifyContent: 'center' }}
         >
-          <Typography>{`${data.name} - ${data.author} - ID: ${data.id}`}</Typography>
-          {user.settings.edit&&<Box sx={{ margin: 0, padding: 0}}>
-            <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
-            <Button sx={{ padding: 0, margin: 0 }} onClick={(event)=>handleListDelete(event, list)}><ClearOutlinedIcon /></Button>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+            <Typography>{`${data.name} - `}</Typography>
+            <Typography>{`${data.author} - `}</Typography>
+            <Typography>{`ID: ${data.id}`}</Typography>
+          </Box>
+          {user.settings.edit&&<Box sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
+            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
+            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></Button>
           </Box>}
         </AccordionSummary>
         <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
@@ -262,13 +301,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                 onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
               />
               <Box>          
-                <TextField sx={{ margin: 2 }} label="Название" variant="standard" value={newRow.name} onChange={({ target }) => {
-                      const resObj = { ...newRow };
-                      resObj.name = target.value;
+                <TextField sx={{ margin: 2 }} label="Название" variant="standard" value={newRow[list].name} onChange={({ target }) => {
+                      const resObj = copy(newRow);
+                      resObj[list].name = target.value;
                       setNewRow(resObj)}} />
-                <TextField sx={{ margin: 2 }} label="Количество" variant="standard" value={newRow.total} onChange={({ target }) => {
-                      const resObj = { ...newRow };
-                      resObj.total = target.value;
+                <TextField sx={{ margin: 2 }} label="Количество" variant="standard" value={newRow[list].total} onChange={({ target }) => {
+                      const resObj = copy(newRow);
+                      resObj[list].total = target.value;
                       setNewRow(resObj)}} />
               </Box>
               <Button

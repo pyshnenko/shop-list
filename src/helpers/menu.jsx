@@ -41,7 +41,6 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
     setAnchorEl(null);
   };
   const handleMenuClick = (evt, ind) => {
-    console.log(ind);
     if (ind==='exit') {
       setUser({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
       setState({login: false, state: ''});

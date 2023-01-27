@@ -122,8 +122,6 @@ export default function Registration({ data, setData, state, setState, user, set
     };
 
     const handleNext = async () => {
-        console.log(activeStep);
-        console.log(steps.length);
         if (activeStep===0) {
             if (data.log==='') {
                 let dat = {...checkPass};
@@ -135,9 +133,7 @@ export default function Registration({ data, setData, state, setState, user, set
                 setOpen(dat)
             }
             else {
-                console.log('вот тут надо проверить');
                 let promis = await api.sendPost({login: data.log}, 'checkLogin', '');
-                console.log(promis.data.result)
                 if (promis.data.result==='buzy') {
                     let dat = {...checkPass};
                     dat.errorL=true;
@@ -187,7 +183,6 @@ export default function Registration({ data, setData, state, setState, user, set
             }
             else {
                 let dat = {...checkPass};
-                console.log(otherData)
                 console.log(await api.sendPost({ 
                     login: data.log, 
                     pass: data.pass, 

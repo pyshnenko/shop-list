@@ -22,10 +22,10 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
     const loginButton = async (evt) => {
         setLoadingIndex(true);
         evt.preventDefault();
-        let answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '');
-        console.log(answ)
+        let answ;
+        try {answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '')}
+        catch(e){getInfoMessage('error', 'База лежит. сорян', false);}
         if (answ?.status!==200) {
-            console.log('error');
             getInfoMessage('error', 'Неверные данные', false);
         }
         else {

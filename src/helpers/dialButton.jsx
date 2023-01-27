@@ -39,7 +39,6 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
     useEffect(() => {
         let d = Math.random() *100;
         if (timer.current) {
-          console.log('clear')
           clearTimeout(timer.current);
         }
         if (user?.settings?.autosave) 
@@ -75,7 +74,6 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
     ];
 
     const handleDialClick = async (evt, name) => {
-        console.log(name)
         if (name==='notedit') {
             let buf = {...user}
             buf.settings.edit=true;
@@ -92,9 +90,6 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
         }
         if (name==='save'){
             setLoadingIndex(true);
-            console.log('save');
-            console.log('editedLists');
-            console.log(editedLists);
             for (let i=0; i<editedLists.length; i++)
                 console.log(await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`));
             setEditedLists([]);

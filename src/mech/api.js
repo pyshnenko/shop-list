@@ -24,7 +24,6 @@ export default class sendApi {
                 return res;
             }
             catch(e) {
-                console.log('nop');
                 console.log(e)
                 return (e.response)
             }

@@ -45,10 +45,8 @@ export default function Profile({ user, setUser, api }) {
     const handleSeechClick = (userSB) => {
         let send = api.sendPost({login: userSB.login}, 'askUserData', `Bearer ${user.token}`);
         send.then((res)=>{
-            console.log(res.data.answer);
             setUserS({...res.data.answer, visible: true, friend: user.friends.includes(userSB.login), token: user.token});
         })
-        console.log(userS)
     }
 
     return (

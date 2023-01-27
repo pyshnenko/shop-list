@@ -40,16 +40,11 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
 
     const handleEnter = async (evt) => {
         setLoadingIndex(true);
-        console.log(user.token);
         setVisibleWindowNewRow(false);
         let acc = user?.settings?.sharedMode ? user?.settings?.sharedMode : 'me';
-        console.log(acc);
         let accU = await accUsList(user?.settings?.sharedMode ? user?.settings?.sharedMode : 'me');
-        console.log(accU);
-        let bbb = await api.sendPost({name: name, author: user.name || user.login, data: [], access: 'friends', accessUsers: ['anton1', 'igor', 'spamigor']}, 'setList', `Bearer ${user.token}`);
-        console.log(bbb);
+        let bbb = await api.sendPost({name: name, author: user.name || user.login, data: [], access: acc, accessUsers: accU}, 'setList', `Bearer ${user.token}`);
         setRows(bbb.data.list);
-        console.log(bbb.data.list);
         let buf = copy (editedLists);
         buf.push(rows.length-1);
         setEditedLists(buf);
@@ -66,7 +61,7 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
                 <Box sx={{ bgcolor: blueGrey[900], padding: '40px',
                     position: 'fixed', top: '40vh', zIndex: '9999', boxShadow: 3, borderRadius: '50px' }}>
                     <TextField sx={{ width: '300px', boxShadow: 3, bgcolor: blueGrey[800] }} 
-                        label='Введи название' value={name} onChange={({ target }) => {setName(target.value)}} />
+                        label='Введи название' value={name} onChange={({ target }) => {if (name.length<25)setName(target.value)}} />
                     <Box sx={{ margin: 0}}>
                         <Button sx={{ margin: '15px 10px 0px 0px' }} 
                             variant='contained'

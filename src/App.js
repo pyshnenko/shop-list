@@ -85,7 +85,7 @@ function App() {
   return (
     <div className="App">
       <div id="erer" ></div>
-      { isMobile ? null : (user?.settings?.animation===1 ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
+      { !user?.settings?.mobileAnimation&&isMobile ? null : ((user?.settings?.animation===1)||(!state.login) ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
       {loadingInd&&<Loading />}
       {state.login&&<header className="App-header">
@@ -110,7 +110,7 @@ function App() {
             {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
           </div>
         </div>
-        <div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>
+        {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
       </ThemeProvider>
     </div>
   );

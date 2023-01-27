@@ -16,6 +16,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import {isMobile} from 'react-device-detect';
 
 export default function Profile({ user, setRows, setState, data, setData, setUser, api }) { 
     const styleText = { central: { display: 'flex', alignItems: 'center' }, name: { color: lightBlue[800], marginRight: '10px' }, text: {}};
@@ -150,13 +151,13 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                     {textFields.map((dat)=>{ return (
                         <Box key={dat.index} sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                             <Box sx={styleText.central}>
-                                {(!edit.activate||dat.index==='login')&&<Typography sx={styleText.name} variant="h5" gutterBottom>{dat.text}</Typography>}
+                                {(!edit.activate||dat.index==='login')&&<Typography sx={styleText.name} variant={isMobile?"h6":"h5"} gutterBottom>{dat.text}</Typography>}
                                 {edit.activate&&dat.index!=='login' ? 
                                     <TextField sx={{ margin: 1 }} label={dat.text} value={edit[dat.index]} onChange={({ target }) => {
                                         const resObj = { ...edit };
                                         resObj[dat.index] = target.value;
                                         setEdit(resObj)}} variant="standard" /> : 
-                                    <Typography sx={styleText.text} variant="h5" gutterBottom>{user[dat.index]}</Typography>}
+                                    <Typography sx={styleText.text} variant={isMobile?"h6":"h5"} gutterBottom>{user[dat.index]}</Typography>}
                                 {!edit.activate&&dat.index==='email'&&user.emailValid&&<CheckIcon sx={{ color: green[500]}} />}
                                 {!edit.activate&&dat.index==='email'&&(!user.emailValid)&&
                                     <IconButton component="label" onClick={handleValidClick}>
