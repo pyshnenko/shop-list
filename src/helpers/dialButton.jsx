@@ -37,7 +37,6 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
     }, []);*/
 
     useEffect(() => {
-        let d = Math.random() *100;
         if (timer.current) {
           clearTimeout(timer.current);
         }
@@ -91,7 +90,7 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
         if (name==='save'){
             setLoadingIndex(true);
             for (let i=0; i<editedLists.length; i++)
-                console.log(await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`));
+                await api.sendPost({list: rows[editedLists[i]]}, 'updList', `Bearer ${user.token}`);
             setEditedLists([]);
             setLoadingIndex(false);
         }

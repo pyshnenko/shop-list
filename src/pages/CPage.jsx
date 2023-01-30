@@ -24,11 +24,15 @@ import ClearOutlinedIcon from '@mui/icons-material/ClearOutlined';
 import NewRowsTab from '../helpers/newRowsTab';
 import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
+import GeneratingUrl from '../helpers/generatingUrl';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import {isMobile} from 'react-device-detect';
 import DelWindow from '../helpers/deleteDialog';
 import FormControl from '@mui/material/FormControl';
+import ShareIcon from '@mui/icons-material/Share';
+
+const addresU = '/build';
 
 const headCells = [
   {
@@ -87,13 +91,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
 
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
-  const [newRow, setNewRow] = useState(arrGen2(rows.length));
+  const [ newRow, setNewRow ] = useState(arrGen2(rows.length));
   const [ visibleWindowNewRow, setVisibleWindowNewRow ] = useState(false);
-  const [open, setOpen] = useState({list: 0, visible: false, text: ''});
-  //const [opent, setOpent] = useState('');
-  const [ editedLists, setEditedLists] = useState([]);
-  const [openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0});
-  const [width, setWidth] = useState(window.innerWidth);
+  const [ open, setOpen ] = useState({list: 0, visible: false, text: ''});
+  const [ editedLists, setEditedLists ] = useState([]);
+  const [ openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0});
+  const [ width, setWidth ] = useState(window.innerWidth);
+  const [ getUrl, setGetUrl ] = useState({visible: false, url: ''});
 
   const timer = useRef();
   const trigUnload = useRef(true);  
@@ -107,6 +111,18 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  const handleShare = async (evt, list) => {
+    setLoadingIndex(true);
+    let id = Number(rows[list].id);
+    api.sendPost({id: id}, 'setHash', `Bearer ${user.token}`)
+      .then((res)=>{
+        let addr = new URL(window.location.href);
+        addr.searchParams.append('list', res.data.hash);
+        setGetUrl({visible: true, url: addr.href});
+        getInfoMessage('success', 'URL сгенерирован', false);
+      })
+  }
 
   const handleClick = (event, list, index) => {
     const rIndex = index + (page[list] * rowsPerPage);
@@ -200,20 +216,19 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
             buf.push(list);
             setEditedLists(buf);
         }
-        getInfoMessage('success', 'Удалено');
+        getInfoMessage('success', 'Удалено', false);
         setVisibleWindowNewRow(false);
-        setLoadingIndex(false);
       }, (e)=>{
         console.log(e);
-        getInfoMessage('error', 'Ошбка');
+        getInfoMessage('error', 'Ошбка', false);
         setVisibleWindowNewRow(false);
-        setLoadingIndex(false);
       });
   }
 
   return (
     <div>
-      {visibleWindowNewRow&&<NewRowsTab setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
+      {getUrl.visible&&<GeneratingUrl user={user} getUrl={getUrl} setGetUrl={setGetUrl} />}
+      {visibleWindowNewRow&&<NewRowsTab newRow={newRow} setNewRow={setNewRow} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} api={api} user={user} rows={rows} setRows={setRows}/>}
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
       {rows.map((data, list)=>{ return (
@@ -231,6 +246,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
             <Typography>{`ID: ${data.id}`}</Typography>
           </Box>
           {user.settings.edit&&<Box sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
+            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleShare(event, list)}><ShareIcon /></Button>
             <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
             <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></Button>
           </Box>}

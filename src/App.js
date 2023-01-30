@@ -9,6 +9,7 @@ import Loading from './helpers/loading';
 import SMess from './helpers/serviceMessage';
 import Login from './pages/Login';
 import UnLogin from './pages/UnLogin';
+import UnLoginAdm from './pages/UnloginAdm';
 import Registation from './pages/Register';
 import CPage from './pages/CPage';
 import Profile from './pages/Profile';
@@ -16,10 +17,11 @@ import Settings from './pages/Settings';
 import SeechUser from './pages/SeechUser';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
-import React, { useState, useEffect, useRef  } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
+import { BrowserRouter as Router, Switch, Route, Link, useRouteMatch, useParams, useSearchParams, useLocation} from 'react-router-dom';
 
 const api = new sendApi ('https://spamigor.site/api');
 
@@ -29,7 +31,7 @@ const darkTheme = createTheme({
   },
 });
 
-function App() {
+function App(props) {
 
   const [ state, setState ] = useState({login: false, state: ''});
   const [ data, setData ] = useState({log: '', pass: ''});
@@ -37,13 +39,34 @@ function App() {
   const [ rows, setRows ] = useState([]);
   const [ loadingInd, setLoadingInd ] = useState(false);  
   const [ openNewRowWindow, setOpenNewRowWindow ] = useState({visible: false, text: '', error: false, success: false});
+  const [ unRows, setUnRows ] = useState({});
+
   const trigger = useRef(true);
+  const trigger2 = useRef(true);
 
   SetInfoMessageStateItems(openNewRowWindow, setOpenNewRowWindow, loadingInd, setLoadingInd);
 
   useEffect(() => {
-    document.title = 'Список покупок';
-    document.documentElement.setAttribute('lang', 'ru')
+    if (trigger2.current) {
+      trigger2.current = false;
+      document.title = 'Список покупок';
+      document.documentElement.setAttribute('lang', 'ru');
+      const params = new URLSearchParams(window.location.search);
+      let addr = params.get('list');
+      if (addr) {
+        trigger.current = false;
+        let answ; 
+        api.sendPost({hash: addr}, 'unLoginAdm', '')
+          .then((res)=>{
+            answ=res;
+            if (answ.status!==200) {
+              setUnRows({data: {}, error: true, textError: 'Некорректная ссылка'})
+            }
+            else setUnRows({data: answ.data.data[0], error: false, textError: ''})
+            setState({login: false, state: 'unLoginAdm'});     
+          })
+      }
+    }
   }, []);
 
   useEffect(()=> {
@@ -83,7 +106,7 @@ function App() {
   }, [state]);
   
   return (
-    <div className="App">
+    <Router><div className="App">
       <div id="erer" ></div>
       { !user?.settings?.mobileAnimation&&isMobile ? null : ((user?.settings?.animation===1)||(!state.login) ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
@@ -108,11 +131,12 @@ function App() {
             {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
+            {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
           </div>
         </div>
         {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
       </ThemeProvider>
-    </div>
+      </div></Router>
   );
 }
 

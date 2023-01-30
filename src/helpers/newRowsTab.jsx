@@ -8,7 +8,7 @@ import { setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import {isMobile} from 'react-device-detect';
 
-export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEditedLists, api, rows, setRows, user }) {
+export default function NewRowsTab({newRow, setNewRow, setVisibleWindowNewRow, editedLists, setEditedLists, api, rows, setRows, user }) {
     const [ name, setName ] = React.useState('');
 
     useEffect(() => {
@@ -47,6 +47,9 @@ export default function NewRowsTab({setVisibleWindowNewRow, editedLists, setEdit
         setRows(bbb.data.list);
         let buf = copy (editedLists);
         buf.push(rows.length-1);
+        let buf2 = copy(newRow);
+        buf2.push({ name: '', total: '' });
+        setNewRow(buf2);
         setEditedLists(buf);
         setLoadingIndex(false);
     }
