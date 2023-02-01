@@ -31,6 +31,9 @@ import {isMobile} from 'react-device-detect';
 import DelWindow from '../helpers/deleteDialog';
 import FormControl from '@mui/material/FormControl';
 import ShareIcon from '@mui/icons-material/Share';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 
 const addresU = '/build';
 
@@ -85,7 +88,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
 
   const arrGen2 = (length) => {
     let buf = [];
-    for (let i=0; i<length; i++) buf.push({ name: '', total: '' });
+    for (let i=0; i<length; i++) buf.push({ name: '', total: '', ind: '' });
+    return buf;
+  }
+
+  const arrGen3 = (length) => {
+    let buf = [];
+    for (let i=0; i<length; i++) buf.push(false);
     return buf;
   }
 
@@ -98,6 +107,8 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const [ openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0});
   const [ width, setWidth ] = useState(window.innerWidth);
   const [ getUrl, setGetUrl ] = useState({visible: false, url: ''});
+  const [ checkForTotal, setCheckForTotal ] = useState({visible: false, ready: false, data: arrGen3(rows.length)});
+  const [ sumLists, setSumLists ] = useState([]);
 
   const timer = useRef();
   const trigUnload = useRef(true);  
@@ -111,6 +122,58 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+  useEffect(() => {
+    if (rows.length>checkForTotal.data.length) {
+      let buf = checkForTotal;
+      for (let i=0; i<(rows.length-checkForTotal.data.length); i++)
+        buf.data.push(false);
+      setCheckForTotal(buf);
+    }
+  }, [rows])
+
+  useEffect(()=>{
+    if (checkForTotal.ready)
+    {
+      console.log('ready');
+      let recDataForSum=[];
+      let bufDataObj={name: [], total: [], ind: []};
+      console.log(rows);
+      for (let i=0; i<checkForTotal.data.length; i++) {
+        if (checkForTotal.data[i]) {
+          console.log(rows[i].data);
+          for (let j=0; j<rows[i].data.length; j++) {
+            if (bufDataObj.name.includes(rows[i].data[j].name.toLocaleLowerCase())){
+              if ((rows[i].data[j].ind===' кг')||(rows[i].data[j].ind===' л'))
+                bufDataObj.total[bufDataObj.name.indexOf(rows[i].data[j].name.toLocaleLowerCase())]+=(rows[i].data[j].total*1000);
+              else bufDataObj.total[bufDataObj.name.indexOf(rows[i].data[j].name.toLocaleLowerCase())]+=(rows[i].data[j].total);
+            }
+            else {
+              bufDataObj.name.push(rows[i].data[j].name.toLocaleLowerCase());
+              bufDataObj.total.push(rows[i].data[j].total*((rows[i].data[j].ind===' л'||rows[i].data[j].ind===' кг')?1000:1));
+              bufDataObj.ind.push(rows[i].data[j].ind===' л'?' мл':rows[i].data[j].ind===' кг'?' г':rows[i].data[j].ind)
+            }
+          }
+        }
+      }
+      for (let i=0; i<bufDataObj.name.length; i++) {
+        let index = '';
+        if ((bufDataObj.ind[i]===' г')&&(bufDataObj.total[i]>1000)) index=' кг';
+        else if ((bufDataObj.ind[i]===' мл')&&(bufDataObj.total[i]>1000)) index=' л';
+        recDataForSum.push({
+          name: (bufDataObj.name[i][0].toUpperCase()+bufDataObj.name[i].slice(1)), 
+          total: ((bufDataObj[i].ind===' г'||bufDataObj[i].ind===' мл')?(bufDataObj.total[i]>1000?(bufDataObj.total[i]/1000):bufDataObj.total[i]):bufDataObj.total[i]),
+          ind: index
+        })
+      }
+      console.log(bufDataObj);
+      console.log(recDataForSum);
+      let buf = copy(sumLists);
+      buf.push({lists: checkForTotal.data, data: recDataForSum});
+      setSumLists(buf);
+      setCheckForTotal({visible: false, ready: false, data: arrGen3(rows.length)});
+    }
+  }, [checkForTotal])
 
   const handleShare = async (evt, list) => {
     setLoadingIndex(true);
@@ -171,10 +234,17 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     const addButton = (evt, list) => {
         if ((newRow[list].name!=='')&&(newRow[list].total!=='')) {
             let buf = copy(rows);
-            buf[list].data.push({name: newRow[list].name, total: newRow[list].total, del: 0, selected: false});
+            let trig = true;
+            buf[list].data.map((row)=>{if (row.name.toLocaleLowerCase()===newRow[list].name.toLocaleLowerCase()) {
+              trig=false; 
+              if (row.ind===newRow[list].ind) row.total+=newRow[list].total;
+              if (((row.ind===' кг')&&(newRow[list].ind===' г'))||((row.ind===' л')&&(newRow[list].ind===' мл'))) row.total+=(newRow[list].total/1000);
+              if (((row.ind===' г')&&(newRow[list].ind===' кг'))||((row.ind===' мл')&&(newRow[list].ind===' л'))) {row.total=(newRow[list].total+row.total/1000); row.ind=newRow[list].ind};
+            }})
+            if (trig) buf[list].data.push({name: newRow[list].name, total: newRow[list].total, ind: newRow[list].ind, del: 0, selected: false});
             setRows(buf);
             let buf2 = copy(newRow);
-            buf2[list]={name: '', total: '' }
+            buf2[list]={name: '', total: '', ind: '' }
             setNewRow(buf2);
             let bPage = copy(page);
             bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
@@ -186,6 +256,10 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
             }
         }
     }
+
+  const handleChangeInd = (evt, list) => {
+
+  }
 
   const handleListEdit = (evt, list) => {
     setOpen({ list: list, visible: true, text: '' });
@@ -216,6 +290,9 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
             buf.push(list);
             setEditedLists(buf);
         }
+        let buf2 = copy(checkForTotal);
+        buf2.data.splice(list, 1);
+        setCheckForTotal(buf2);
         getInfoMessage('success', 'Удалено', false);
         setVisibleWindowNewRow(false);
       }, (e)=>{
@@ -223,6 +300,12 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         getInfoMessage('error', 'Ошбка', false);
         setVisibleWindowNewRow(false);
       });
+  }
+
+  const handleCheckForTotal = (list) => {
+    let buf = copy(checkForTotal);
+    buf.data[list]=!buf.data[list];
+    setCheckForTotal(buf);
   }
 
   return (
@@ -238,9 +321,10 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
           aria-controls="panel1a-content"
           id="panel1a-header"
           key={data.name+list}
-          sx={{ display: 'flex', justifyContent: 'center' }}
+          sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
         >
-          <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+            {checkForTotal.visible&&<Checkbox checked={checkForTotal.data[list]} onClick={(event)=>handleCheckForTotal(list)} sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, margin: 0, padding: 0 }} />}
             <Typography>{`${data.name} - `}</Typography>
             <Typography>{`${data.author} - `}</Typography>
             <Typography>{`ID: ${data.id}`}</Typography>
@@ -294,7 +378,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                             >
                               {row.name}
                             </TableCell>
-                            <TableCell align="right">{row.total}</TableCell>
+                            <TableCell align="right">{row.total + (row.ind?row.ind:'')}</TableCell>
                             <TableCell align="right">
                               <IconButton onClick={(event) => handleDelClick(event, list, index)}>
                                 <DeleteIcon />
@@ -316,15 +400,39 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                 onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
                 onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
               />
-              <Box>          
-                <TextField sx={{ margin: 2 }} label="Название" variant="standard" value={newRow[list].name} onChange={({ target }) => {
+              <Box sx={{ display: 'flex'}}>          
+                <TextField sx={{ margin: 1 }} label="Название" variant="standard" value={newRow[list].name} onChange={({ target }) => {
                       const resObj = copy(newRow);
                       resObj[list].name = target.value;
                       setNewRow(resObj)}} />
-                <TextField sx={{ margin: 2 }} label="Количество" variant="standard" value={newRow[list].total} onChange={({ target }) => {
-                      const resObj = copy(newRow);
-                      resObj[list].total = target.value;
-                      setNewRow(resObj)}} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <TextField sx={{ margin: 1 }} label="Количество" variant="standard" value={newRow[list].total} onChange={({ target }) => {
+                        const resObj = copy(newRow);
+                        let num = Number(target.value);
+                        if (num) {
+                          resObj[list].total = num;
+                          setNewRow(resObj)}
+                        else if (target.value[target.value.length-1]===','||target.value[target.value.length-1]==='.') {
+                          resObj[list].total = target.value;
+                          setNewRow(resObj);
+                      }}} />
+                  <FormControl variant="standard" sx={{ width: 20, marginRight: '20px' }}>
+                    <Select
+                      value={newRow[list].ind}
+                      onChange={({target})=>{
+                        const resObj = copy(newRow);
+                        resObj[list].ind = target.value;
+                        setNewRow(resObj)
+                      }}
+                    >
+                      <MenuItem value=""> </MenuItem>
+                      <MenuItem value={' кг'}>кг</MenuItem>
+                      <MenuItem value={' г'}>г</MenuItem>
+                      <MenuItem value={' л'}>л</MenuItem>
+                      <MenuItem value={' мл'}>мл</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
               </Box>
               <Button
                 onClick={(event)=>addButton(event, list)}>
@@ -335,7 +443,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         </AccordionDetails>    
       </Accordion></Grow>
       )})}
-      <DButton trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
+      <DButton checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
     </div>
   );
 }

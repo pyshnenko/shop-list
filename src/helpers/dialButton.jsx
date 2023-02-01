@@ -7,6 +7,9 @@ import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutl
 import Box from '@mui/material/Box';
 import SpeedDial from '@mui/material/SpeedDial';
 import { styled } from '@mui/material/styles';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import TaskIcon from '@mui/icons-material/Task';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { setLoadingIndex } from '../helpers/leftInfoWindow';
 
 const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
@@ -21,20 +24,9 @@ const StyledSpeedDial = styled(SpeedDial)(({ theme }) => ({
     },
   }));
 
-export default function SMess({timer, trigUnload, api, rows, user, setUser, setVisibleWindowNewRow, editedLists, setEditedLists }) {
+export default function SMess({ checkForTotal, setCheckForTotal, timer, trigUnload, api, rows, user, setUser, setVisibleWindowNewRow, editedLists, setEditedLists }) {
     const [height, setHeight] = useState(window.innerHeight);
     const [width, setWidth] = useState(window.innerWidth);
-
-    /*useEffect(()=>{
-        if (trigUnload.current) {
-            trigUnload.current=false;
-            document.addEventListener('unload', handleDialClick({}, 'save'));
-          
-            return () => {
-                document.removeEventListener('unload', handleDialClick({}, 'save'));
-            };
-        }
-    }, []);*/
 
     useEffect(() => {
         if (timer.current) {
@@ -69,7 +61,13 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
     const actions = [
         { icon: <SaveIcon />, name: 'Сохранить', mode: 'save' },
         { icon: user?.settings?.edit ? <ModeEditOutlineOutlinedIcon /> : <EditOffOutlinedIcon />, name: 'Редактировать', mode: user?.settings?.edit ? 'edit' : 'notedit' },
+        { icon: <NoteAddIcon />, name: 'Создать общий список', mode: 'checkForTotal' },
         { icon: <SpeedDialIcon />, name: 'Создать', mode: 'create' },
+    ];
+
+    const actionsV = [
+        { icon: <TaskIcon />, name: 'Создать общий список', mode: 'CreateTotal' },
+        { icon: <CancelIcon />, name: 'Отменить', mode: 'cancel' },
     ];
 
     const handleDialClick = async (evt, name) => {
@@ -86,6 +84,22 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
         if (name==='create') {
           setVisibleWindowNewRow(true);
             //api.sendPost()
+        }
+        if (name==='checkForTotal') {
+            let buf = {...checkForTotal};
+            buf.visible=true;
+            setCheckForTotal(buf);
+        }
+        if (name==='cancel') {
+            let buf = {...checkForTotal};
+            buf.visible=false;
+            setCheckForTotal(buf);
+        }
+        if (name==='CreateTotal') {
+            let buf = {...checkForTotal};
+            buf.visible=false;
+            buf.ready=true;
+            setCheckForTotal(buf);
         }
         if (name==='save'){
             setLoadingIndex(true);
@@ -105,13 +119,21 @@ export default function SMess({timer, trigUnload, api, rows, user, setUser, setV
                 icon={<SpeedDialIcon />}
                 direction='up'
             >
-              {actions.map((action, index) => (
-                <SpeedDialAction
-                  key={action.name}
-                  icon={action.icon}
-                  tooltipTitle={action.name}
-                  onClick={(event)=>handleDialClick(event, action.mode)}
-                />
+              {checkForTotal.visible ?  
+                actionsV.map((action, index) => (
+                  <SpeedDialAction
+                    key={action.name}
+                    icon={action.icon}
+                    tooltipTitle={action.name}
+                    onClick={(event)=>handleDialClick(event, action.mode)}
+                  />)) :
+                actions.map((action, index) => (
+                  <SpeedDialAction
+                    key={action.name}
+                    icon={action.icon}
+                    tooltipTitle={action.name}
+                    onClick={(event)=>handleDialClick(event, action.mode)}
+                  />
               ))}
             </StyledSpeedDial>
           </Box>
