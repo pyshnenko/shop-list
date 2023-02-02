@@ -31,3 +31,5 @@ web-приложение на реакт
 Статика выдается через nginx, сервер апи на next.js (прокси через nginx), сервер изображений на node.js (прокси через nginx)
 
 ssl - let's encrypt
+
+https://spamigor.site/build/
