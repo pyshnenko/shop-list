@@ -25,6 +25,7 @@ import NewRowsTab from '../helpers/newRowsTab';
 import DButton from '../helpers/dialButton';
 import DWindow from '../helpers/dialogWindow';
 import GeneratingUrl from '../helpers/generatingUrl';
+import SumListsGenerator from '../helpers/sumListsGenerator';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import {isMobile} from 'react-device-detect';
@@ -92,22 +93,16 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     return buf;
   }
 
-  const arrGen3 = (length) => {
-    let buf = [];
-    for (let i=0; i<length; i++) buf.push(false);
-    return buf;
-  }
-
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
   const [ newRow, setNewRow ] = useState(arrGen2(rows.length));
   const [ visibleWindowNewRow, setVisibleWindowNewRow ] = useState(false);
   const [ open, setOpen ] = useState({list: 0, visible: false, text: ''});
   const [ editedLists, setEditedLists ] = useState([]);
-  const [ openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0});
+  const [ openDelW, setOpenDelW ] = useState({visible: false, result: false, answer: false, list: 0, sums: false});
   const [ width, setWidth ] = useState(window.innerWidth);
   const [ getUrl, setGetUrl ] = useState({visible: false, url: ''});
-  const [ checkForTotal, setCheckForTotal ] = useState({visible: false, ready: false, data: arrGen3(rows.length)});
+  const [ checkForTotal, setCheckForTotal ] = useState({visible: false, ready: false, data: []});
   const [ sumLists, setSumLists ] = useState([]);
 
   const timer = useRef();
@@ -122,58 +117,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       window.removeEventListener('resize', handleResize);
     };
   }, []);
-
-  useEffect(() => {
-    if (rows.length>checkForTotal.data.length) {
-      let buf = checkForTotal;
-      for (let i=0; i<(rows.length-checkForTotal.data.length); i++)
-        buf.data.push(false);
-      setCheckForTotal(buf);
-    }
-  }, [rows])
-
-  useEffect(()=>{
-    if (checkForTotal.ready)
-    {
-      console.log('ready');
-      let recDataForSum=[];
-      let bufDataObj={name: [], total: [], ind: []};
-      console.log(rows);
-      for (let i=0; i<checkForTotal.data.length; i++) {
-        if (checkForTotal.data[i]) {
-          console.log(rows[i].data);
-          for (let j=0; j<rows[i].data.length; j++) {
-            if (bufDataObj.name.includes(rows[i].data[j].name.toLocaleLowerCase())){
-              if ((rows[i].data[j].ind===' кг')||(rows[i].data[j].ind===' л'))
-                bufDataObj.total[bufDataObj.name.indexOf(rows[i].data[j].name.toLocaleLowerCase())]+=(rows[i].data[j].total*1000);
-              else bufDataObj.total[bufDataObj.name.indexOf(rows[i].data[j].name.toLocaleLowerCase())]+=(rows[i].data[j].total);
-            }
-            else {
-              bufDataObj.name.push(rows[i].data[j].name.toLocaleLowerCase());
-              bufDataObj.total.push(rows[i].data[j].total*((rows[i].data[j].ind===' л'||rows[i].data[j].ind===' кг')?1000:1));
-              bufDataObj.ind.push(rows[i].data[j].ind===' л'?' мл':rows[i].data[j].ind===' кг'?' г':rows[i].data[j].ind)
-            }
-          }
-        }
-      }
-      for (let i=0; i<bufDataObj.name.length; i++) {
-        let index = '';
-        if ((bufDataObj.ind[i]===' г')&&(bufDataObj.total[i]>1000)) index=' кг';
-        else if ((bufDataObj.ind[i]===' мл')&&(bufDataObj.total[i]>1000)) index=' л';
-        recDataForSum.push({
-          name: (bufDataObj.name[i][0].toUpperCase()+bufDataObj.name[i].slice(1)), 
-          total: ((bufDataObj[i].ind===' г'||bufDataObj[i].ind===' мл')?(bufDataObj.total[i]>1000?(bufDataObj.total[i]/1000):bufDataObj.total[i]):bufDataObj.total[i]),
-          ind: index
-        })
-      }
-      console.log(bufDataObj);
-      console.log(recDataForSum);
-      let buf = copy(sumLists);
-      buf.push({lists: checkForTotal.data, data: recDataForSum});
-      setSumLists(buf);
-      setCheckForTotal({visible: false, ready: false, data: arrGen3(rows.length)});
-    }
-  }, [checkForTotal])
 
   const handleShare = async (evt, list) => {
     setLoadingIndex(true);
@@ -266,14 +209,14 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   }
 
   const handleListDeleteBefore = (evt, list) => {
-    if (!user?.settings?.askToDel) handleListDelete(evt, list);
-    else setOpenDelW({visible: true, result: false, answer: false, list: list})
+    if ((!user?.settings?.askToDel)&&(!openDelW.sums)) handleListDelete(evt, list);
+    else setOpenDelW({visible: true, result: false, answer: false, list: list, sums: false})
   }
 
   useEffect (()=>{
-    if (openDelW.answer) {
+    if ((openDelW.answer)&&(!openDelW.sums)) {
       if (openDelW.result) handleListDelete({}, openDelW.list);
-      setOpenDelW({visible: false, result: false, answer: false, list: 0})
+      setOpenDelW({visible: false, result: false, answer: false, list: 0, sums: false})
     }
   }, [openDelW])
 
@@ -303,8 +246,11 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   }
 
   const handleCheckForTotal = (list) => {
+    let id = rows[list].id;
     let buf = copy(checkForTotal);
-    buf.data[list]=!buf.data[list];
+    if (buf.data.includes(id)) buf.splice(buf.data.indexOf(id),1);
+    else buf.data.push(id);
+    buf.data.sort();
     setCheckForTotal(buf);
   }
 
@@ -324,7 +270,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
           sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
         >
           <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            {checkForTotal.visible&&<Checkbox checked={checkForTotal.data[list]} onClick={(event)=>handleCheckForTotal(list)} sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, margin: 0, padding: 0 }} />}
+            {checkForTotal.visible&&<Checkbox checked={checkForTotal.data.includes(data.id)} onClick={(event)=>handleCheckForTotal(list)} sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, margin: 0, padding: 0 }} />}
             <Typography>{`${data.name} - `}</Typography>
             <Typography>{`${data.author} - `}</Typography>
             <Typography>{`ID: ${data.id}`}</Typography>
@@ -392,11 +338,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
               </TableContainer>
               <TablePagination
                 sx={{ padding: 0 }}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[5, 10, 25, 50]}
                 component="div"
                 count={rows[list].data.length}
                 rowsPerPage={rowsPerPage}
-                page={(page[list] ? page[list] : page[list]===0 ? 0 : 0)}
+                labelRowsPerPage={'Строк'}
+                labelDisplayedRows={({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage)+1}`}}
+                page={(page[list] ? page[list] : 0)}
                 onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
                 onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
               />
@@ -416,8 +364,9 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                           resObj[list].total = target.value;
                           setNewRow(resObj);
                       }}} />
-                  <FormControl variant="standard" sx={{ width: 20, marginRight: '20px' }}>
+                  <FormControl variant="standard" sx={{ minWidth: 40, marginRight: '20px' }}>
                     <Select
+                      sx={{ paddingTop: '20px'}}
                       value={newRow[list].ind}
                       onChange={({target})=>{
                         const resObj = copy(newRow);
@@ -443,6 +392,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         </AccordionDetails>    
       </Accordion></Grow>
       )})}
+      <SumListsGenerator rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />
       <DButton checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
     </div>
   );
