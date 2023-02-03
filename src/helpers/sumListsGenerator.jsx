@@ -3,6 +3,7 @@ import copy from 'fast-copy';
 import _ from 'lodash';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -29,6 +30,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import SaveIcon from '@mui/icons-material/Save';
 
 const addresU = '/build';
 
@@ -73,7 +75,7 @@ function EnhancedTableHead() {
     );
 }
 
-export default function SumListsGenerator({ rows, setRows, api, user, checkForTotal, setCheckForTotal, openDelW, setOpenDelW, sumLists, setSumLists }) {
+export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user, checkForTotal, setCheckForTotal, openDelW, setOpenDelW, sumLists, setSumLists }) {
 
     const arrGen = (length) => {
         let buf = [0];
@@ -84,7 +86,6 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
     const [ page, setPage ] = useState(arrGen(sumLists.length));
     const [ rowsPerPage, setRowsPerPage ] = useState(10);
     const [ width, setWidth ] = useState(window.innerWidth);
-    const [ getUrl, setGetUrl ] = useState({visible: false, url: ''});
 
     let triggerSumlists = useRef(true);
 
@@ -101,19 +102,13 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
     useEffect(()=>{
         if (triggerSumlists.current) {
             triggerSumlists.current=false;
-            if (localStorage.listSummary) {
-                console.log(localStorage.listSummary);
-                let arrBuf = JSON.parse(localStorage.listSummary);
-                console.log(arrBuf)
-                let sBuf=[];
-                //arrBuf.map(item=>createList(item))
-                for (let i=0; i<arrBuf.length; i++) {
-                    console.log(arrBuf[i]);
-                    let fBuf = createList(arrBuf[i]);
-                    if (fBuf) sBuf.push(fBuf);
-                }
-                if (sBuf.length!==0) setSumLists(sBuf)
-            }
+            setLoadingIndex(true);
+            let lists = api.sendPost({}, 'sumLists', `Bearer ${user.token}`);
+            lists.then((res)=>{
+                console.log(res)
+                setSumLists(res.data.sumLists)
+                getInfoMessage('success', 'Обновлено', false);
+            })
         }
     }, [])
 
@@ -131,24 +126,12 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
                 sBuf.push(buf);
                 setSumLists(sBuf);
                 setPage(arrGen(sBuf.length));
-                
-                let savedDataBuf = JSON.parse(localStorage.getItem('listSummary'));
-                if (!localStorage.listSummary) savedDataBuf=[];
-                if (typeof(savedDataBuf)==='object') {
-                    let needSave = true;
-                    for (let i=0; i<savedDataBuf.length; i++ ) {
-                        if (_.isEqual(savedDataBuf[i].data, checkForTotal.data)) needSave = false;
-                    }
-                    if (needSave) savedDataBuf.push(checkForTotal);
-                }
-                localStorage.setItem('listSummary', JSON.stringify(savedDataBuf));
                 setCheckForTotal({visible: false, ready: false, data: []});
             }
         }
     }, [checkForTotal])
 
     const createList = (arrData) => {
-        console.log(arrData);
         let startCheck = false;
         for (let i=0; i<arrData.data.length; i++) {
             for (let j=0; j<rows.length; j++) {
@@ -159,7 +142,6 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
                 else startCheck=false;
             }
         }
-        console.log(startCheck);
         if(startCheck) {
             let recDataForSum=[];
             let bufDataObj={name: [], total: [], sumTotal: [], ind: []};
@@ -203,9 +185,8 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
                 })
             }
             let listsBuf = {num: [], name: []};
-            console.log(arrData.data)
             rows.map((item, list)=>{if (arrData.data.includes(item.id)) {listsBuf.num.push(rows[list].id); listsBuf.name.push(rows[list].name)}});
-            return {lists: listsBuf, data: recDataForSum};
+            return {lists: listsBuf, data: recDataForSum, id: 0, saved: false};
         }
         else return null
     }
@@ -258,19 +239,42 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
 
     const handleListDelete = (evt, list) => {
         setLoadingIndex(true);
-        let buf = copy(sumLists);
-        buf.splice(list,1);
-        setSumLists(buf);
-        if (localStorage.listSummary) {
-            let lBuf = JSON.parse(localStorage.listSummary);
-            lBuf.splice(list,1);
-            localStorage.setItem('listSummary', JSON.stringify(lBuf))
+        if (sumLists[list].saved) {
+            let lBuf = api.sendPost({id: sumLists[list].id}, 'delSumList', `Bearer ${user.token}`);
+            lBuf.then((res)=>{
+                if (res.status===200) {
+                    let buf = copy(sumLists);
+                    buf.splice(list,1);
+                    setSumLists(buf);
+                    getInfoMessage('success', 'Удалено', false);
+                }
+                else {                    
+                    getInfoMessage('error', 'Не удалено', false);
+                }
+            })
         }
-        getInfoMessage('success', 'Удалено', false);
+    }
+
+    const saveFunction = (list) => {
+        setLoadingIndex(true);
+        let send = api.sendPost(sumLists[list], 'saveSumList', `Bearer ${user.token}`);
+        send.then((res)=>{
+            console.log(res);
+            if (res.status===200) {
+                let buf = copy (sumLists);
+                buf[list].id = res.data.id;
+                buf[list].hash = res.data.hash;
+                buf[list].saved = true;
+                setSumLists(buf);
+                getInfoMessage('success', 'Сохранено', false);
+            }
+            else getInfoMessage('error', 'Не сохранено', false);
+        })
     }
 
     return (
         <Box sx={{ marginTop: 5 }}>
+            {console.log(sumLists)}
             {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
             {sumLists.map((data, list)=>{ return (
                 <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={list}><Accordion sx={{ boxShadow: 3 }} key={list}>
@@ -280,9 +284,18 @@ export default function SumListsGenerator({ rows, setRows, api, user, checkForTo
                         sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
                     >
                         <Typography>{`Совмещенный лист: ${data.lists.name.map((item)=>' '+item.trim())}`}</Typography>
-                        {user.settings.edit&&<Box sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
-                            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></Button>
-                        </Box>}
+                        <ButtonGroup variant="text" sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
+                            {user.settings.edit&&<IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></IconButton>}
+                            <IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>saveFunction(list)} ><SaveIcon /></IconButton>
+                            {data.saved&&<IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={()=>{
+                                setLoadingIndex(true);
+                                let addr = new URL(window.location.href);
+                                addr.searchParams.append('list', data.hash);
+                                addr.searchParams.append('done', 'sumtList');
+                                setGetUrl({visible: true, url: addr.href});
+                                getInfoMessage('success', 'URL сгенерирован', false);
+                            }}><ShareIcon /></IconButton>}
+                        </ButtonGroup>
                     </AccordionSummary>
                     <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
                         <Box sx={{ margin: (isMobile)?0:'10px', boxShadow: 3 }}>

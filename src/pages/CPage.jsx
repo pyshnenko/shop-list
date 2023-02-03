@@ -125,6 +125,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       .then((res)=>{
         let addr = new URL(window.location.href);
         addr.searchParams.append('list', res.data.hash);
+        addr.searchParams.append('done', 'stList');
         setGetUrl({visible: true, url: addr.href});
         getInfoMessage('success', 'URL сгенерирован', false);
       })
@@ -392,7 +393,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         </AccordionDetails>    
       </Accordion></Grow>
       )})}
-      <SumListsGenerator rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />
+      <SumListsGenerator setGetUrl={setGetUrl} rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />
       <DButton checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
     </div>
   );

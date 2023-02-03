@@ -52,11 +52,13 @@ function App(props) {
       document.title = 'Список покупок';
       document.documentElement.setAttribute('lang', 'ru');
       const params = new URLSearchParams(window.location.search);
+      let done = params.get('done');
+      console.log(done)
       let addr = params.get('list');
       if (addr) {
         trigger.current = false;
         let answ; 
-        api.sendPost({hash: addr}, 'unLoginAdm', '')
+        api.sendPost({hash: addr}, done==='stList'?'unLoginAdm':'unSumLoginAdm', '')
           .then((res)=>{
             answ=res;
             if (answ.status!==200) {

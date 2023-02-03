@@ -50,9 +50,11 @@ export default function UnLoginAdm({ state, setState, unRows, setUnRows, api }) 
 
     const saveButton = async (evt) => {
         setLoadingIndex(true); 
-        let act = await api.sendPost({list: {id: unRows.data.id, data: rows}}, 'updAUList', '');
+        let act = await api.sendPost({list: {id: unRows.data.id, data: rows}}, unRows.data.hasOwnProperty('saved')?'updASumUList':'updAUList', '');
         if (act.status===200) {
-            setRows(act.data.res[0].data)
+            if (Array.isArray(act.data.res))
+                setRows(act.data.res[0].data)
+            else setRows(act.data.res.list[0].data)
             getInfoMessage('success', 'Данные переданы', false);
         }
         else 
