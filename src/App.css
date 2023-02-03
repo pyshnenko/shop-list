@@ -86,3 +86,7 @@ body {
   z-index: -1;
   top: 0;
 }
+
+#someSumClass>div {
+  justify-content: space-between;
+}

@@ -281,12 +281,11 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         key={list}
+                        id={'someSumClass'}
                         sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
                     >
                         <Typography>{`Совмещенный лист: ${data.lists.name.map((item)=>' '+item.trim())}`}</Typography>
-                        <ButtonGroup variant="text" sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
-                            {user.settings.edit&&<IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></IconButton>}
-                            <IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>saveFunction(list)} ><SaveIcon /></IconButton>
+                        <ButtonGroup variant="text" sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap', justifyContent: 'center' }}>
                             {data.saved&&<IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={()=>{
                                 setLoadingIndex(true);
                                 let addr = new URL(window.location.href);
@@ -295,6 +294,8 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
                                 setGetUrl({visible: true, url: addr.href});
                                 getInfoMessage('success', 'URL сгенерирован', false);
                             }}><ShareIcon /></IconButton>}
+                            <IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>saveFunction(list)} ><SaveIcon /></IconButton>
+                            {user.settings.edit&&<IconButton sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></IconButton>}
                         </ButtonGroup>
                     </AccordionSummary>
                     <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
