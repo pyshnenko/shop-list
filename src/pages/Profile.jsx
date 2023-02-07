@@ -48,11 +48,25 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
         console.log(res);
     }
 
-    const handleValidClick = async () => {        
+    const handleValidClick = async (evt, index) => {        
         setLoadingIndex(true);
         console.log('valid');
-        console.log(await api.sendPost({}, 'checkMail', `Bearer ${user.token}`));
-        getInfoMessage('success','Данные отправлены', false);
+        if (index==='email') {
+            console.log(await api.sendPost({}, 'checkMail', `Bearer ${user.token}`));
+            getInfoMessage('success','Данные отправлены', false);
+        }
+        else if (index==='telegram') {
+            let res = await api.sendPost({}, 'tgCheck', `Bearer ${user.token}`);
+            if (res.status===200) {
+                let buf = {...user};
+                buf.telegramValid=true;
+                setUser(buf);
+                getInfoMessage('success','Подтверждено', false);
+            }
+            else 
+                getInfoMessage('error','Повтори позже', false);
+        }
+        else getInfoMessage('error','Неопознанный идентификатор', false);
     }
 
     const handleNoButton = (name) => {
@@ -151,16 +165,19 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                     {textFields.map((dat)=>{ return (
                         <Box key={dat.index} sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                             <Box sx={styleText.central}>
-                                {(!edit.activate||dat.index==='login')&&<Typography sx={styleText.name} variant={isMobile?"h6":"h5"} gutterBottom>{dat.text}</Typography>}
-                                {edit.activate&&dat.index!=='login' ? 
+                                {(!edit.activate||dat.index==='login'||dat.index==='telegram')&&<Typography sx={styleText.name} variant={isMobile?"h6":"h5"} gutterBottom>{dat.text}</Typography>}
+                                {edit.activate&&dat.index!=='login'&&dat.index!=='telegram' ? 
                                     <TextField sx={{ margin: 1 }} label={dat.text} value={edit[dat.index]} onChange={({ target }) => {
                                         const resObj = { ...edit };
                                         resObj[dat.index] = target.value;
                                         setEdit(resObj)}} variant="standard" /> : 
-                                    <Typography sx={styleText.text} variant={isMobile?"h6":"h5"} gutterBottom>{user[dat.index]}</Typography>}
-                                {!edit.activate&&dat.index==='email'&&user.emailValid&&<CheckIcon sx={{ color: green[500]}} />}
-                                {!edit.activate&&dat.index==='email'&&(!user.emailValid)&&
-                                    <IconButton component="label" onClick={handleValidClick}>
+                                    (dat.index!=='telegram'||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID))))&&<Typography sx={styleText.text} variant={isMobile?"h6":"h5"} gutterBottom>
+                                        {dat.index==='telegram' ? (user.telegram==='' ? user.telegramID : user.telegram) : user[dat.index]}
+                                    </Typography>}
+                                {!edit.activate&&((dat.index==='email'&&(user.emailValid))||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID))&&(user.telegramValid)))&&
+                                    <CheckIcon sx={{ color: green[500]}} />}
+                                {!edit.activate&&((dat.index==='email'&&(!user.emailValid))||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID))&&(!user.telegramValid)))&&
+                                    <IconButton component="label" onClick={(event)=>handleValidClick(event, dat.index)}>
                                         <CloseIcon sx={{ color: red[500]}} /> 
                                     </IconButton>}
                             </Box>

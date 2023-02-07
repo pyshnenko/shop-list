@@ -122,9 +122,13 @@ export default function UsersCard({ userS, setUserS, api, user, setUser }) {
                         <Box key={dat.index} sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
                             <Box sx={styleText.central}>
                                 {<Typography sx={styleText.name} variant="h5" gutterBottom>{dat.text}</Typography>}
-                                {<Typography sx={styleText.text} variant="h5" gutterBottom>{userS[dat.index]}</Typography>}
+                                {<Typography sx={styleText.text} variant="h5" gutterBottom>
+                                    {dat.index==='telegram'?(userS.telegram===''?userS.telegramID:userS.telegram):userS[dat.index]}
+                                </Typography>}
                                 {dat.index==='email'&&userS.emailValid&&<CheckIcon sx={{ color: green[500]}} />}
+                                {dat.index==='telegram'&&userS.telegramValid&&<CheckIcon sx={{ color: green[500]}} />}
                                 {dat.index==='email'&&(!userS.emailValid)&&<CloseIcon sx={{ color: red[500]}} />}
+                                {dat.index==='telegram'&&(!userS.telegramValid)&&<CloseIcon sx={{ color: red[500]}} />}
                             </Box>
                         </Box>
                     )})}

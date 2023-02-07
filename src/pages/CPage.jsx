@@ -393,7 +393,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         </AccordionDetails>    
       </Accordion></Grow>
       )})}
-      <SumListsGenerator setGetUrl={setGetUrl} rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />
+      {user.hasOwnProperty('sumLists')&&(user?.sumLists.length!==0)&&<SumListsGenerator setGetUrl={setGetUrl} rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />}
       <DButton checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />
     </div>
   );
