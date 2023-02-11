@@ -184,7 +184,7 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
 
     const handleClick = (event, list, index) => {
         console.log('click')
-        const rIndex = index + (page[list] * rowsPerPage);
+        const rIndex = index + ((page[list]||0) * rowsPerPage);
         let buf = copy(sumLists);
         buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
         let bufR = copy(rows);
