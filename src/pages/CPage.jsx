@@ -32,11 +32,8 @@ import {isMobile} from 'react-device-detect';
 import DelWindow from '../helpers/deleteDialog';
 import FormControl from '@mui/material/FormControl';
 import ShareIcon from '@mui/icons-material/Share';
-import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-
-const addresU = '/build';
 
 const headCells = [
   {
@@ -150,7 +147,9 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   };
 
   const handleChangeRowsPerPage = (event,list) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+    console.log(event.target.value);
+    //setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(event.target.value)
     let bPage = copy(page);
     bPage[list]=0;
     setPage(bPage);
@@ -200,10 +199,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
             }
         }
     }
-
-  const handleChangeInd = (evt, list) => {
-
-  }
 
   const handleListEdit = (evt, list) => {
     setOpen({ list: list, visible: true, text: '' });

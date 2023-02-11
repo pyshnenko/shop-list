@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import copy from 'fast-copy';
-import _ from 'lodash';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
 import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
@@ -14,7 +12,6 @@ import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
-import TextField from '@mui/material/TextField';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -25,14 +22,8 @@ import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import {isMobile} from 'react-device-detect';
 import DelWindow from '../helpers/deleteDialog';
-import FormControl from '@mui/material/FormControl';
 import ShareIcon from '@mui/icons-material/Share';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
 import SaveIcon from '@mui/icons-material/Save';
-
-const addresU = '/build';
 
 const headCells = [
     {
@@ -274,7 +265,6 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
 
     return (
         <Box sx={{ marginTop: 5 }}>
-            {console.log(sumLists)}
             {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
             {sumLists.map((data, list)=>{ return (
                 <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={list}><Accordion sx={{ boxShadow: 3 }} key={list}>
@@ -309,7 +299,7 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
                                         <EnhancedTableHead />
                                         <TableBody>
                                             {sumLists[list].data
-                                                .slice(page[list] * rowsPerPage, page[list] * rowsPerPage + rowsPerPage)
+                                                .slice(page[list] * rowsPerPage, (page[list]||0) * rowsPerPage + rowsPerPage)
                                                 .map((row, index) => {
                                             const isItemSelected = row.selected;
                                             const labelId = `enhanced-table-checkbox-${index}`;
