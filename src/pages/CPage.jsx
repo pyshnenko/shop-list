@@ -164,7 +164,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     setRows()
     buf[list].data.splice(index, 1);
     setRows(buf);
-    let pp = Math.trunc((rows[list].data.length/rowsPerPage)-0.001);
+    let pp = Math.trunc((buf[list].data.length/rowsPerPage)-0.001);
     bpage[list]=(p<pp ? p : pp)
     setPage(bpage);
     if (!editedLists.includes(list)) {
@@ -177,14 +177,20 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     const addButton = (evt, list) => {
         if ((newRow[list].name!=='')&&(newRow[list].total!=='')) {
             let buf = copy(rows);
+            let rTotal = Number(newRow[list].total);
+            let rInd = newRow[list].ind;
+            if (newRow[list].ind===' г') { rTotal = Number(newRow[list].total)/1000; rInd = ' кг' }
+            else if (newRow[list].ind===' мл') { rTotal = Number(newRow[list].total)/1000; rInd = ' л' }
             let trig = true;
-            buf[list].data.map((row)=>{if (row.name.toLocaleLowerCase()===newRow[list].name.toLocaleLowerCase()) {
-              trig=false; 
-              if (row.ind===newRow[list].ind) row.total+=newRow[list].total;
-              if (((row.ind===' кг')&&(newRow[list].ind===' г'))||((row.ind===' л')&&(newRow[list].ind===' мл'))) row.total+=(newRow[list].total/1000);
-              if (((row.ind===' г')&&(newRow[list].ind===' кг'))||((row.ind===' мл')&&(newRow[list].ind===' л'))) {row.total=(newRow[list].total+row.total/1000); row.ind=newRow[list].ind};
-            }})
-            if (trig) buf[list].data.push({name: newRow[list].name, total: newRow[list].total, ind: newRow[list].ind, del: 0, selected: false});
+            buf[list].data.map((row)=>{
+              if (row.name.toLocaleLowerCase()===newRow[list].name.toLocaleLowerCase()) {
+                trig=false; 
+                if (row.ind===' мл') { row.ind = ' л'; row.total/=1000+rTotal}
+                else if (row.ind===' г') { row.ind = ' кг'; row.total/=1000+rTotal}
+                else { row.ind = rInd; row.total+=rTotal }
+              }
+            })
+            if (trig) buf[list].data.push({name: newRow[list].name, total: rTotal, ind: rInd, del: 0, selected: false});
             setRows(buf);
             let buf2 = copy(newRow);
             buf2[list]={name: '', total: '', ind: '' }
@@ -320,7 +326,12 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                             >
                               {row.name}
                             </TableCell>
-                            <TableCell align="right">{row.total + (row.ind?row.ind:'')}</TableCell>
+                            <TableCell align="right">{
+                              (row.ind===' л'&&row.total<1) ? 
+                                (row.total*1000+' мл') : 
+                                (row.ind===' кг'&&row.total<1) ? 
+                                  (row.total*1000+' г') : row.total + (row.ind||'')
+                            }</TableCell>
                             <TableCell align="right">
                               <IconButton onClick={(event) => handleDelClick(event, list, index)}>
                                 <DeleteIcon />
@@ -339,7 +350,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
                 count={rows[list].data.length}
                 rowsPerPage={rowsPerPage}
                 labelRowsPerPage={'Строк'}
-                labelDisplayedRows={({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage)+1}`}}
+                labelDisplayedRows={({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage-0.0001)+1}`}}
                 page={(page[list] ? page[list] : 0)}
                 onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
                 onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
