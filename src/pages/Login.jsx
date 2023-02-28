@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 
-export default function AccountMenu({ user, setRows, setState, data, setData, setUser, api }) {
+export default function AccountMenu({ user, setRows, setState, data, setData, setUser, api, setSerials }) {
 
     const [errState, setErrState] = useState({log: false, pass: false});
     const [label, setLabel] = useState({log: 'Логин', pass: 'Пароль'});
@@ -36,6 +36,10 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
             setUser(rdata)
             setState({login: true, state: 'centralPage'});
             setLabel({log: 'Логин', pass: 'Пароль'});
+            let serialsReq = await api.sendPost({login: user.name}, 'findSerialList', `Bearer ${answ.data.data[0].token}`);
+            if (serialsReq.status===200) setSerials({...serialsReq.data, res: true, status: serialsReq.status});
+            else if(serialsReq.status===402) setSerials({res: false, status: serialsReq.status});
+            else setSerials({res: false, status: serialsReq.status})
             getInfoMessage('success', 'Данные получены', false);
             if (rdata?.settings?.localSave) localStorage.setItem('listToken', answ.data.data[0].token)
         }

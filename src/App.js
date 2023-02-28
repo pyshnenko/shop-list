@@ -14,6 +14,7 @@ import Registation from './pages/Register';
 import CPage from './pages/CPage';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Serials from './pages/Serials';
 import SeechUser from './pages/SeechUser';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
@@ -40,6 +41,7 @@ function App(props) {
   const [ loadingInd, setLoadingInd ] = useState(false);  
   const [ openNewRowWindow, setOpenNewRowWindow ] = useState({visible: false, text: '', error: false, success: false});
   const [ unRows, setUnRows ] = useState({});
+  const [ serials, setSerials ] = useState({});
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
@@ -95,6 +97,13 @@ function App(props) {
                 if (res.data.data[0]?.settings?.localSave) localStorage.setItem('listToken', res.data.token);
                 if (localStorage.listState) setState(JSON.parse(localStorage.listState))
               }
+              const serResult = api.sendPost({login: res.data.data[0].login}, 'findSerialList', `Bearer ${res.data.data[0].token}`);
+              serResult.then((serRes)=>{
+                console.log(serRes);
+                if (serRes.status===200) setSerials({...serRes.data, res: true, status: serRes.status});
+                else if(serRes.status===402) setSerials({res: false, status: serRes.status});
+                else setSerials({res: false, status: serRes.status})
+              })
             })
           }
         })
@@ -126,13 +135,14 @@ function App(props) {
             height: '100vh'
           }}>
           <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+            {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} /> }
             {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
+            {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
             {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
           </div>
         </div>

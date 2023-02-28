@@ -15,6 +15,7 @@ import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
+import MovieIcon from '@mui/icons-material/Movie';
 
 export default function AccountMenu({ user, setUser, state, setState, setRows }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -72,6 +73,11 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
       sState.state='settings';
       setState(sState)
     }
+    else if (ind==='serials') {
+      let sState={...state};
+      sState.state='serials';
+      setState(sState)
+    }
   };
   return (
     <React.Fragment>
@@ -81,9 +87,6 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
             onClick={handleClick}
             size="small"
             sx={{ ml: 2 }}
-            aria-controls={open ? 'account-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
           >
             <Badge color="primary" variant="dot" invisible={!(user.askToAdd&&user.askToAdd.length!==0)}>
               <Avatar
@@ -139,6 +142,9 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
         </MenuItem>
         <MenuItem onClick={(event)=> {handleMenuClick(event,'openlists')}}>
           <SearchIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Поиск списка
+        </MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'serials')}}>
+          <MovieIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Сериальчики
         </MenuItem>
         <Divider />
         <MenuItem onClick={(event)=> {handleMenuClick(event,'addfriend')}}>
