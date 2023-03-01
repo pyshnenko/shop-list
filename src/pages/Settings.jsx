@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
-import { blueGrey, green, grey, lightBlue, red, yellow } from '@mui/material/colors';
+import { blueGrey } from '@mui/material/colors';
 import Grow from '@mui/material/Grow';
 import Button from '@mui/material/Button';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
@@ -11,7 +11,6 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import MenuItem from '@mui/material/MenuItem';
 
 const backStyle = {
@@ -29,9 +28,6 @@ const backStyle = {
     margin: '100px 0',
     padding: '20px'
 }
-
-const animName = [ 'картинка', 'Салютики', 'Точки' ];
-const shName = [ 'Только я', 'Мои друзья', 'Некоторые друзья', 'Все' ];
 
 export default function Profile({ user, setUser, api }) { 
 

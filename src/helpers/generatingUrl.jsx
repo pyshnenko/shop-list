@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
-import { styled } from '@mui/material/styles';
 import { setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
 import TextField from '@mui/material/TextField';
@@ -8,7 +7,6 @@ import Button from '@mui/material/Button';
 import { blueGrey } from '@mui/material/colors';
 
 export default function GenUrl({ user, getUrl, setGetUrl }) {
-    const [height, setHeight] = useState(window.innerHeight);
     const [width, setWidth] = useState(window.innerWidth);
 
     useEffect(() => {
@@ -28,16 +26,6 @@ export default function GenUrl({ user, getUrl, setGetUrl }) {
     useEffect(() => {
       const handleResize = (event) => {
         setWidth(event.target.innerWidth);
-      };
-      window.addEventListener('resize', handleResize);
-      return () => {
-        window.removeEventListener('resize', handleResize);
-      };
-    }, []);
-  
-    useEffect(() => {
-      const handleResize = (event) => {
-        setHeight(event.target.innerHeight);
       };
       window.addEventListener('resize', handleResize);
       return () => {

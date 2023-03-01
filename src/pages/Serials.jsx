@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
-import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -17,6 +16,7 @@ import TextField from '@mui/material/TextField';
 import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 export default function Serials({ user, setUser, api, serials, setSerials }) { 
     
@@ -24,7 +24,6 @@ export default function Serials({ user, setUser, api, serials, setSerials }) {
     const [ alList, setAlList ] = useState({text: '', ready: false, result: false, visible: false, make: ''});
     const [ width, setWidth ] = useState(window.innerWidth);
     const [ edit, setEdit ] = useState({old: '', new: ''});
-    //const needSave = useRef(false);
 
     useEffect(() => {
         const handleResize = (event) => {
@@ -60,6 +59,16 @@ export default function Serials({ user, setUser, api, serials, setSerials }) {
                         getInfoMessage('success', 'Создано', false);
                     }
                 })
+            }
+            else if (alList.make[0]==='@') {
+                let commands = alList.make.slice(1, 4);
+                let item = alList.make.slice(5);
+                if (commands === 'del')
+                {
+                    let buf = serials;
+                    delete(buf.list[item]);
+                    setSerials(buf);
+                }
             }
             setAlList({text: '', ready: false, result: false, visible: false, make: ''})
         }
@@ -120,29 +129,40 @@ export default function Serials({ user, setUser, api, serials, setSerials }) {
                 {Object.keys(serials.list).map((item, index)=>{
                     return (
                         <div key={item}>
-                            <Accordion expanded={expanded===index} onChange={handleChange(index)}
-                                sx ={{ width: '50vw', minWidth: '350px' }}>
-                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                    {edit.old!==item&&<Typography>{item}</Typography>}
-                                    {edit.old===item&&<TextField value={edit.new} onChange={({ target }) => {
-                                        let buf = {...edit};
-                                        buf.new = target.value;
-                                        setEdit(buf)}} />}
-                                    {edit.old!==item&&<IconButton sx={{ padding: 0, margin: 0 }}
-                                        onClick={()=>setEdit({old: item, new: item })}
-                                    >
-                                        <EditIcon />
-                                    </IconButton>}
-                                    {edit.old===item&&<IconButton sx={{ padding: 0, margin: 0 }}
-                                        onClick={()=>checkEdit()}
-                                    >
-                                        <CheckIcon />
-                                    </IconButton>}
-                                </AccordionSummary>
-                                <AccordionDetails>
-                                    <SerialTable serials={serials} setSerials={setSerials} itemS={item} />
-                                </AccordionDetails>
-                            </Accordion>
+                            <Grow in={true} timeout={1000 * index} appear={user.settings.grow} key={item}>
+                                <Accordion expanded={expanded===index} onChange={handleChange(index)}
+                                    sx ={{ width: '50vw', minWidth: '350px', boxShadow: 3, margin: 1 }}>
+                                    <AccordionSummary expandIcon={<ExpandMoreIcon />} >
+                                        <Box sx={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                                            {edit.old!==item&&<Typography>{item}</Typography>}
+                                            {edit.old===item&&<TextField value={edit.new} onChange={({ target }) => {
+                                                let buf = {...edit};
+                                                buf.new = target.value;
+                                                setEdit(buf)}} />}
+                                            <Box>
+                                                {edit.old!==item&&<IconButton sx={{ padding: '0 5px', margin: 0 }}
+                                                    onClick={()=>setEdit({old: item, new: item })}
+                                                >
+                                                    <EditIcon />
+                                                </IconButton>}
+                                                {edit.old===item&&<IconButton sx={{ padding: '0 5px', margin: 0 }}
+                                                    onClick={()=>checkEdit()}
+                                                >
+                                                    <CheckIcon />
+                                                </IconButton>}
+                                                {edit.old===item&&<IconButton sx={{ padding: '0 5px', margin: 0 }}
+                                                    onClick={()=>setAlList({text: `Удаляем "${item}"?`, ready: false, result: false, visible: true, make: `@del:${item}`})}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>}
+                                            </Box>
+                                        </Box>
+                                    </AccordionSummary>
+                                    <AccordionDetails sx={{ padding: width<500?'8px 4px 16px':'8px 16px 16px' }}>
+                                        <SerialTable serials={serials} setSerials={setSerials} itemS={item} user={user} />
+                                    </AccordionDetails>
+                                </Accordion>
+                            </Grow>
                         </div>
                     )
                 })}

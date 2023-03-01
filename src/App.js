@@ -22,7 +22,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
-import { BrowserRouter as Router, Switch, Route, Link, useRouteMatch, useParams, useSearchParams, useLocation} from 'react-router-dom';
 
 const api = new sendApi ('https://spamigor.site/api');
 
@@ -117,7 +116,7 @@ function App(props) {
   }, [state]);
   
   return (
-    <Router><div className="App">
+    <div className="App">
       <div id="erer" ></div>
       { !user?.settings?.mobileAnimation&&isMobile ? null : ((user?.settings?.animation===1)||(!state.login) ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
       <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
@@ -148,7 +147,7 @@ function App(props) {
         </div>
         {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
       </ThemeProvider>
-      </div></Router>
+      </div>
   );
 }
 

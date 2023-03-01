@@ -17,6 +17,8 @@ import TableHead from '@mui/material/TableHead';
 import EditIcon from '@mui/icons-material/Edit';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
+import YorNallert from './yORnAllert';
 
 function TablePaginationActions(props) {
 
@@ -80,11 +82,12 @@ function TablePaginationActions(props) {
     );
 }
 
-export default function SerialTable({serials, setSerials, itemS}) {
+export default function SerialTable({serials, setSerials, itemS, user}) {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [ newSerial, setNewSerial ] = useState({name: '', s: '', e: '', t: ''});
+    const [ alList, setAlList ] = useState({text: '', ready: false, result: false, visible: false, make: ''});
 
     const [width, setWidth] = useState(window.innerWidth);
 
@@ -98,12 +101,28 @@ export default function SerialTable({serials, setSerials, itemS}) {
             };
     }, []);
 
+    useEffect(() => {
+        if ((alList.ready)&&(alList.result)) {
+            if (alList.make[0]==='@') {
+                let commands = alList.make.slice(1,4);
+                let item = alList.make.slice(5);
+                if (commands==='del') {
+                    let buf = serials;
+                    delete(buf.list[itemS][item])
+                    setSerials(buf);
+                }
+            }
+            setAlList({text: '', ready: false, result: false, visible: false, make: ''});
+        }
+    }, [alList])
+
     const columns = [
         { id: 'name', label: 'Название', minWidth: width < 500 ? 50 : 100 },
-        { id: 'seazon', label: 'Сезон', minWidth: width < 500 ? 30 : 60 },
-        { id: 'episod', label: 'Эпизод', minWidth: width < 500 ? 30 : 60 },
+        { id: 'seazon', label: width<500?'Сез.':'Сезон', minWidth: width < 500 ? 20 : 60 },
+        { id: 'episod', label: width<500?'Эп.':'Эпизод', minWidth: width < 500 ? 20 : 60 },
         { id: 'time', label: 'Время', minWidth: width < 500 ? 30 : 60 },
-        { id: 'edit', label: '', minWidth: width < 500 ? 30 : 60 }
+        { id: 'edit', label: '', minWidth: width < 500 ? 30 : 40 },
+        { id: 'delete', label: '', minWidth: width < 500 ? 30 : 40 }
     ];
 
     const handleChangePage = (event, newPage) => {
@@ -128,14 +147,14 @@ export default function SerialTable({serials, setSerials, itemS}) {
 
     return (
         <div>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
             <Table>
                 <TableHead>
                     <TableRow>
                         {columns.map((column) => (
                             <TableCell
                                 key={column.id}
-                                style={{ minWidth: column.minWidth, padding: 5 }}
+                                style={{ minWidth: column.minWidth, padding: 5, color: '#729595' }}
                                 >
                                 {column.label}
                             </TableCell>
@@ -148,23 +167,30 @@ export default function SerialTable({serials, setSerials, itemS}) {
                     : !(serials.list[itemS]) ? null : Object.keys(serials.list[itemS])
                 ).map((row) => (
                     <TableRow key={row}>
-                        <TableCell component="th" scope="row" style={{ padding: width>500? 10 : 5 }}>
+                        <TableCell component="th" scope="row" style={{ padding: width>500? 10 : 5, color: '#BDC4C4' }}>
                             {row}
                         </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5 }} align="right">
+                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5, color: '#BDC4C4' }} align="center">
                             {serials.list[itemS][row].s}
                         </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5 }} align="right">
+                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5, color: '#BDC4C4' }} align="center">
                             {serials.list[itemS][row].e}
                         </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5 }} align="right">
+                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5, color: '#BDC4C4' }} align="center">
                             {serials.list[itemS][row].t}
                         </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5 }} align="center">
-                        <IconButton
+                        <TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
+                        <IconButton sx={{ padding: 0 }}
                             onClick={()=>setNewSerial({name: row, s: serials.list[itemS][row].s, e: serials.list[itemS][row].e, t: serials.list[itemS][row].t})}
                         >
-                            <EditIcon />
+                            <EditIcon sx={{color: '#3E6E3E'}} />
+                        </IconButton>
+                        </TableCell>
+                        <TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
+                        <IconButton sx={{ padding: 0 }}
+                            onClick={()=>setAlList({text: `Удаляем "${row}"?`, ready: false, result: false, visible: true, make: `@del:${row}`})}
+                        >
+                            <DeleteIcon sx={{color: '#794545'}} />
                         </IconButton>
                         </TableCell>
                     </TableRow>
@@ -174,7 +200,7 @@ export default function SerialTable({serials, setSerials, itemS}) {
                     <TableRow>
                         <TablePagination
                             rowsPerPageOptions={[10, 25, { label: 'All', value: -1 }]}
-                            colSpan={width < 500 ? 4 : 5}
+                            colSpan={width < 500 ? 6 : 6}
                             count={Object.keys(serials.list[itemS]).length}
                             rowsPerPage={rowsPerPage}
                             page={page}
@@ -182,7 +208,9 @@ export default function SerialTable({serials, setSerials, itemS}) {
                             onRowsPerPageChange={handleChangeRowsPerPage}
                             ActionsComponent={TablePaginationActions}
                             labelRowsPerPage={'Строк'}
-                            labelDisplayedRows={width > 500 ? ({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage-0.0001)+1}`} : ({ page }) => {return`${page+1}`}}
+                            labelDisplayedRows={width > 500 ? ({ from, to, count, page }) => {
+                                return`${page+1} из ${Math.floor(count/rowsPerPage-0.0001)+1 || 1}`} : ({ page }) => {return`${page+1}`
+                            }}
                         />
                     </TableRow>
                 </TableFooter>
@@ -217,9 +245,11 @@ export default function SerialTable({serials, setSerials, itemS}) {
                     </Box>
                 </Box>
                 <Box>
-                    <Button sx={{ margin: 1 }} onClick = {(event)=>addButton(event)}>{serials.list[itemS].hasOwnProperty(newSerial.name.trim())?'Изменить':'Добавить'}</Button>
+                    <Button sx={{ margin: 1, color: '#54A4A4' }} onClick = {(event)=>addButton(event)}>{serials.list[itemS].hasOwnProperty(newSerial.name.trim())?'Изменить':'Добавить'}</Button>
                 </Box>
             </Box>
-        </TableContainer></div>
+        </TableContainer>
+            {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
+        </div>
     );
 }
