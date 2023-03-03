@@ -135,7 +135,7 @@ function App(props) {
           }}>
           <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} /> }
-            {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+            {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setRows = {setRows} /> }
             {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
             {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }

@@ -11,6 +11,7 @@ import { blueGrey } from '@mui/material/colors';
 import TextField from '@mui/material/TextField';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
+import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -31,7 +32,7 @@ const steps = [
     },
   ];
 
-export default function Registration({ data, setData, state, setState, user, setUser, api }) {
+export default function Registration({ data, setData, state, setState, user, setUser, api, setSerials, setRows }) {
     const windowInnerWidth = window.innerWidth;
     const windowInnerHeight = window.innerHeight;
     const horiz = windowInnerWidth/windowInnerHeight>1;
@@ -183,21 +184,24 @@ export default function Registration({ data, setData, state, setState, user, set
             }
             else {
                 let dat = {...checkPass};
-                console.log(await api.sendPost({ 
+                let sjj = api.sendPost({ 
                     login: data.log, 
                     pass: data.pass, 
                     first_name: otherData.lastName, 
                     last_name: otherData.seckondName, 
                     name: otherData.name, 
                     email: otherData.email 
-                }, 'reg', '' ))
-                dat.errorE=false;
-                setCheckPass(dat)
-                setOpen({succes: true, error: false, time: 5000, text: 'Успех'})
-                setUser({login: data.log, key: '123', token: '321', role: 'user', name: otherData.name, last_name: otherData.lastName, first_name: otherData.seckondName, email: otherData.email})
-                setState({login: true, state: 'centralPage'});
-                setData({log: '', pass: ''});
-                setActiveStep(0)
+                }, 'reg', '' )
+                sjj.then(async res=> 
+                    {dat.errorE=false;
+                    setCheckPass(dat)
+                    setOpen({succes: true, error: false, time: 5000, text: 'Успех'});
+                    let answ;
+                    console.log(res.status)                    
+                    setState({login: false, state: ''});
+                    setData({log: '', pass: ''});
+                    setActiveStep(0)
+                })                
             }
         }
         else setActiveStep((prevActiveStep) => prevActiveStep + 1);
