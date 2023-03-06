@@ -1,0 +1,4 @@
+﻿[[redirects]]
+  from = "/build*"
+  to = "/build/index.html"
+  status = 200

@@ -19,9 +19,12 @@ import SeechUser from './pages/SeechUser';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
 import React, { useState, useEffect, useRef } from 'react';
+import {useTelegram} from "./src/hooks/useTelegram";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
+import {Route, Routes, BrowserRouter as Router} from 'react-router-dom';
+import Form from './pages/botPages/form';
 
 const api = new sendApi ('https://spamigor.site/api');
 
@@ -31,7 +34,27 @@ const darkTheme = createTheme({
   },
 });
 
-function App(props) {
+function App(props)  {
+  const {onToggleButton, tg} = useTelegram();
+
+  useEffect(() => {
+      tg.ready();
+  }, [])
+
+  return (
+    <div className="App">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Appaa />}/>
+          <Route path="/form" element={<Form />}/>
+          <Route path="/build/form" element={<Form />}/>
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+
+function Appaa(props) {
 
   const [ state, setState ] = useState({login: false, state: ''});
   const [ data, setData ] = useState({log: '', pass: ''});
@@ -44,6 +67,12 @@ function App(props) {
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
+
+  const {onToggleButton, tg} = useTelegram();
+
+    useEffect(() => {
+        tg.ready();
+    }, [])
 
   SetInfoMessageStateItems(openNewRowWindow, setOpenNewRowWindow, loadingInd, setLoadingInd);
 
@@ -116,38 +145,38 @@ function App(props) {
   }, [state]);
   
   return (
-    <div className="App">
-      <div id="erer" ></div>
-      { !user?.settings?.mobileAnimation&&isMobile ? null : ((user?.settings?.animation===1)||(!state.login) ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
-      <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
-      {loadingInd&&<Loading />}
-      {state.login&&<header className="App-header">
-        <Menu user={user} setUser={setUser} state={state} setState={setState} setRows={setRows}/>
-      </header>}
-      <ThemeProvider theme={darkTheme}>
-      <CssBaseline />
-        <div className="workDiv" style={{ 
-            backgroundImage: `url(${background})`,
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'cover',
-            height: '100vh'
-          }}>
-          <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} /> }
-            {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setRows = {setRows} /> }
-            {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
-            {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
-            {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
-          </div>
-        </div>
-        {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
-      </ThemeProvider>
-      </div>
+    <div className="Appaa">
+          <div id="erer" ></div>
+          { !user?.settings?.mobileAnimation&&isMobile ? null : ((user?.settings?.animation===1)||(!state.login) ? <Three /> : user?.settings?.animation===2 ? <ThreeMin /> : null) }
+          <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
+          {loadingInd&&<Loading />}
+          {state.login&&<header className="App-header">
+            <Menu user={user} setUser={setUser} state={state} setState={setState} setRows={setRows}/>
+          </header>}
+          <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+            <div className="workDiv" style={{ 
+                backgroundImage: `url(${background})`,
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                backgroundSize: 'cover',
+                height: '100vh'
+              }}>
+              <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} /> }
+                {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setRows = {setRows} /> }
+                {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+                {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+                {(state.login)&&(state.state==='profile')&&<Profile rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
+                {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
+                {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
+                {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
+                {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
+              </div>
+            </div>
+            {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
+          </ThemeProvider>        
+    </div>
   );
 }
 
