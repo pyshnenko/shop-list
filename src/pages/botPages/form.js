@@ -40,7 +40,7 @@ const Form = () => {
         } else {
             tg.MainButton.show();
         }
-    }, [seazon, epizod])
+    }, [seazon, epizod, time])
 
     return (
         <div>
