@@ -35,19 +35,35 @@ const darkTheme = createTheme({
 });
 
 function App(props)  {
-  const {onToggleButton, tg} = useTelegram();
+  const {onToggleButton, tg} = useTelegram();  
+  const [ form, setForm ] = useState(false)
+  const trigger3 = useRef(true);
 
   useEffect(() => {
       tg.ready();
-  }, [])
+  }, []);  
+
+  useEffect(() => {
+    if (trigger3.current) {
+      trigger3.current = false;
+      const params = new URLSearchParams(window.location.search);
+      let form = params.get('form');
+      if (form) {
+        setForm(true);
+      }
+    }
+  }, []);
+
+  console.log(window.location.pathname);
 
   return (
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={<Appaa />}/>
+          <Route path="/" element={form ? <Form /> : <Appaa />}/>
+          <Route path="/build?" element={form ? <Form /> : <Appaa />}/>
           <Route path="/form" element={<Form />}/>
-          <Route path="/build/form" element={<Form />}/>
+          <Route path="/build/form?" element={<Form />}/>
         </Routes>
       </Router>
     </div>
