@@ -17,9 +17,23 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinearProgress from '@mui/material/LinearProgress';
-import Button from '@mui/material/Button';
+import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { styled } from '@mui/material/styles';
+
+
+const BorderLinearProgress = styled(LinearProgress)(({ theme, target, onTarget }) => ({
+    height: 10,
+    borderRadius: '30px',
+    [`&.${linearProgressClasses.colorPrimary}`]: {
+    backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
+    },
+    [`& .${linearProgressClasses.bar}`]: {
+    borderRadius: 30,
+    boxShadow: `0 0 20px rgb(${255-255*(onTarget||0)/(target||1)},${255*(onTarget||0)/(target||1)},0)`,
+    backgroundColor: theme.palette.mode === 'light' ? `#1a90ff` : `rgb(${255-255*(onTarget||0)/(target||1)},${255*(onTarget||0)/(target||1)},0)`,
+    },
+}));
 
 export default function Trening({ user, setUser, api, trening, setTrening }) { 
     
@@ -221,10 +235,11 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
                     border: '2px solid white',
                     boxShadow: '0 0 10px white'
                 }}>
+                {(!trening.target||trening.target<=0)&&<Typography>Давай зададим цель на этот месяц</Typography>}
                 <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center', justifyContent: 'space-between' }}>
-                    <LinearProgress sx = {{ height: '30px', borderRadius: '30px', width: '85%'}} variant="determinate" value={100*trening.onTarget/(trening.target||1)} />
-                    {!targetEditMode&&<Typography>{trening.target||0}</Typography>}
-                    {targetEditMode&&<TextField value={targetEditValue} type='number' onChange={({ target }) => {setTargetEditValue(target.value)}} />}
+                    {trening.target&&(trening.target>0)&&<BorderLinearProgress target={trening.target} onTarget={trening.onTarget} sx = {{ height: '30px', borderRadius: '30px', width: '85%' }} variant="determinate" value={100*trening.onTarget/(trening.target||1)} />}
+                    {!targetEditMode&&trening.target&&(trening.target>0)&&<Typography>{trening.target||0}</Typography>}
+                    {targetEditMode&&<TextField sx={{width: '90px'}} value={targetEditValue} type='number' onChange={({ target }) => {setTargetEditValue(target.value)}} />}
                     {!targetEditMode&&<IconButton onClick={()=>{setTargetEditMode(!targetEditMode); setTargetEditValue(trening.target||0)}}>
                         <EditIcon />
                     </IconButton>}
@@ -232,12 +247,12 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
                         <SaveIcon />
                     </IconButton>}
                 </Box>
-                <IconButton onClick={()=>plusButton()}>
+                {trening.target&&(trening.target>0)&&<IconButton onClick={()=>plusButton()}>
                     <AddIcon />
-                </IconButton>
-                <IconButton onClick={()=>plusButton()}>
-                    <RestartAltIcon onClick={()=>restButton()} />
-                </IconButton>
+                </IconButton>}
+                {trening.target&&(trening.target>0)&&<IconButton onClick={()=>restButton()}>
+                    <RestartAltIcon />
+                </IconButton>}
             </Box>
             {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
         </div>
