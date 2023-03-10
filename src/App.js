@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Serials from './pages/Serials';
 import SeechUser from './pages/SeechUser';
+import Trenings from './pages/Trenings';
 import background from './back3.jpeg';
 import sendApi from './mech/api';
 import React, { useState, useEffect, useRef } from 'react';
@@ -80,6 +81,7 @@ function Appaa(props) {
   const [ openNewRowWindow, setOpenNewRowWindow ] = useState({visible: false, text: '', error: false, success: false});
   const [ unRows, setUnRows ] = useState({});
   const [ serials, setSerials ] = useState({});
+  const [ trening, setTrening ] = useState({});
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
@@ -146,7 +148,14 @@ function Appaa(props) {
                 console.log(serRes);
                 if (serRes.status===200) setSerials({...serRes.data, res: true, status: serRes.status});
                 else if(serRes.status===402) setSerials({res: false, status: serRes.status});
-                else setSerials({res: false, status: serRes.status})
+                else setSerials({res: false, status: serRes.status});
+                const trenRes = api.sendPost({login: res.data.data[0].login}, 'findTreningList', `Bearer ${res.data.data[0].token}`);
+                trenRes.then((trenRes)=>{
+                  console.log(serRes);
+                  if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
+                  else if(trenRes.status===402) setTrening({res: false, status: trenRes.status});
+                  else setTrening({res: false, status: trenRes.status});
+                })
               })
             })
           }
@@ -187,6 +196,7 @@ function Appaa(props) {
                 {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
                 {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
                 {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
+                {(state.login)&&(state.state==='trening')&&<Trenings user={user} setUser={setUser} api={api} trening={trening} setTrening={setTrening} /> }
                 {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
               </div>
             </div>

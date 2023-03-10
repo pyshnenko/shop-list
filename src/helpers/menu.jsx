@@ -16,6 +16,7 @@ import Logout from '@mui/icons-material/Logout';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
 import MovieIcon from '@mui/icons-material/Movie';
+import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
 export default function AccountMenu({ user, setUser, state, setState, setRows }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -76,6 +77,11 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
     else if (ind==='serials') {
       let sState={...state};
       sState.state='serials';
+      setState(sState)
+    }
+    else if (ind==='trening') {
+      let sState={...state};
+      sState.state='trening';
       setState(sState)
     }
   };
@@ -145,6 +151,9 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
         </MenuItem>
         <MenuItem onClick={(event)=> {handleMenuClick(event,'serials')}}>
           <MovieIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Сериальчики
+        </MenuItem>
+        <MenuItem onClick={(event)=> {handleMenuClick(event,'trening')}}>
+          <FitnessCenterIcon sx={{ marginLeft: '-7px', width: 42, height: 32, color: grey[500] }} /> Тренировочки
         </MenuItem>
         <Divider />
         <MenuItem onClick={(event)=> {handleMenuClick(event,'addfriend')}}>
