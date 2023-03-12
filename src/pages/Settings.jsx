@@ -138,9 +138,10 @@ export default function Profile({ user, setUser, api }) {
                             label="Фон"
                             onChange={handleCheck}
                         >
-                            <MenuItem value={0}>Картинка</MenuItem>
+                            <MenuItem value={0}>Черный</MenuItem>
                             <MenuItem value={1}>Салютики</MenuItem>
                             <MenuItem value={2}>Точки</MenuItem>
+                            <MenuItem value={3}>Картинка</MenuItem>
                         </Select>
                     </FormControl>
                     <FormControl sx={{ m: 1, width: 300 }}>

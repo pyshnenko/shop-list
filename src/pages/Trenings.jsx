@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -20,9 +20,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { styled } from '@mui/material/styles';
+import AccessibleForwardIcon from '@mui/icons-material/AccessibleForward';
 
 
-const BorderLinearProgress = styled(LinearProgress)(({ theme, target, onTarget }) => ({
+const BorderLinearProgress = styled(LinearProgress)(({ theme, value }) => ({
     height: 10,
     borderRadius: '30px',
     [`&.${linearProgressClasses.colorPrimary}`]: {
@@ -30,8 +31,8 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme, target, onTarget }
     },
     [`& .${linearProgressClasses.bar}`]: {
     borderRadius: 30,
-    boxShadow: `0 0 20px rgb(${255-255*(onTarget||0)/(target||1)},${255*(onTarget||0)/(target||1)},0)`,
-    backgroundColor: theme.palette.mode === 'light' ? `#1a90ff` : `rgb(${255-255*(onTarget||0)/(target||1)},${255*(onTarget||0)/(target||1)},0)`,
+    boxShadow: `0 0 20px rgb(${(2*255-2*2.55*value)<=255?(2*255-2*2.55*value):255},${(2*2.55*value)<=255?(2*2.55*value):255},0)`,
+    backgroundColor: theme.palette.mode === 'light' ? `#1a90ff` : `rgb(${(2*255-2*2.55*value)<=255?(2*255-2*2.55*value):255},${(2*2.55*value)<=255?(2*2.55*value):255},0)`,
     },
 }));
 
@@ -43,6 +44,7 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     const [ edit, setEdit ] = useState({old: '', new: ''});
     const [ targetEditMode, setTargetEditMode ] = useState(false);
     const [ targetEditValue, setTargetEditValue ] = useState(0);
+    const trig = useRef(true);
 
     useEffect(() => {
         const handleResize = (event) => {
@@ -55,13 +57,25 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     }, []);
 
     useEffect(()=>{
-        console.log(trening);
         if ((!alList.ready)&&(trening.status===402)) {
             console.log('aaaa')
             setAlList({text: 'Создадим хранилище?', ready: false, result: false, visible: true, make: 'create'})
         }
         if (!trening.hasOwnProperty('categories')) {
             let buf = {...trening, categories: {'Без категории': {}}};
+            setTrening(buf);
+        }
+        if ((trening.status===200)&&(trig)) {
+            trig.current = false;
+            let buf = {...trening};
+            let sDate = trening.date ? new Date(trening.date) : new Date();
+            let rDate = new Date();
+            if ((sDate.getFullYear()===rDate.getFullYear())&&(sDate.getMonth()===rDate.getMonth()))
+                buf.onTarget = trening.onTarget || 0;
+            else {
+                buf.onTarget = 0;
+                buf.date = Number(new Date())
+            }
             setTrening(buf);
         }
     }, [trening])
@@ -139,6 +153,7 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
             setLoadingIndex(true);
             let buf = trening;
             buf.target = Number(targetEditValue);
+            buf.date = Number(new Date());
             if (!buf.hasOwnProperty('onTarget')) buf.onTarget=0;
             let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
             if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
@@ -151,8 +166,13 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
 
     const plusButton = async () => {
         setLoadingIndex(true);
-        let buf = trening; 
-        buf.onTarget ? buf.onTarget=buf.onTarget+1 : buf.onTarget=1;
+        let buf = trening;
+        let sDate = trening.date ? (new Date(trening.date)) : (new Date());
+        let rDate = new Date();
+        if ((rDate.getFullYear()===sDate.getFullYear())&&(rDate.getMonth()===sDate.getMonth()))
+            buf.onTarget ? buf.onTarget=buf.onTarget+1 : buf.onTarget=1;
+        else buf.onTarget = 1;
+        buf.date = Number(sDate);
         let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
@@ -164,6 +184,8 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     const restButton = async () => {
         setLoadingIndex(true);
         let buf = trening; 
+        let sDate = trening.date ? (new Date(trening.date)) : (new Date());
+        buf.date = Number(sDate);
         buf.onTarget=0;
         console.log(buf);
         let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
@@ -233,26 +255,42 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
                     margin: '20px',
                     borderRadius: '30px', 
                     border: '2px solid white',
-                    boxShadow: '0 0 10px white'
+                    boxShadow: '0 0 10px white',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
                 }}>
-                {(!trening.target||trening.target<=0)&&<Typography>Давай зададим цель на этот месяц</Typography>}
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center', justifyContent: 'space-between' }}>
-                    {trening.target&&(trening.target>0)&&<BorderLinearProgress target={trening.target} onTarget={trening.onTarget} sx = {{ height: '30px', borderRadius: '30px', width: '85%' }} variant="determinate" value={100*trening.onTarget/(trening.target||1)} />}
-                    {!targetEditMode&&trening.target&&(trening.target>0)&&<Typography>{trening.target||0}</Typography>}
-                    {targetEditMode&&<TextField sx={{width: '90px'}} value={targetEditValue} type='number' onChange={({ target }) => {setTargetEditValue(target.value)}} />}
-                    {!targetEditMode&&<IconButton onClick={()=>{setTargetEditMode(!targetEditMode); setTargetEditValue(trening.target||0)}}>
+                {(trening.target===trening.onTarget)&&(trening.target!==0)&&(trening.target)&&<Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'row',
+                        flexWrap: 'nowrap',
+                        alignItems: 'center',
+                        marginBottom: 2 
+                    }}>
+                    <AccessibleForwardIcon sx={{transform: 'scale(-1, 1)' }} />
+                    <Typography>Успех!!!</Typography>
+                    <AccessibleForwardIcon />
+                </Box>}
+                {(!trening.hasOwnProperty('target')||trening.target<=0)&&<Typography>Давай зададим цель на этот месяц</Typography>}
+                {(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<BorderLinearProgress sx = {{ height: '30px', borderRadius: '30px', width: '100%' }} variant="determinate" value={(100*((trening.onTarget||0)/(trening.target||1)))>100?100:100*((trening.onTarget||0)/(trening.target||1))} />}
+                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center', justifyContent: 'center' }}>
+                    {!targetEditMode&&(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<Typography sx={{margin: 2}}>Твой прогресс: {trening.onTarget||0} из {trening.target||0}</Typography>}
+                    {(targetEditMode||(trening.target===0)||(!trening.hasOwnProperty('target')))&&<TextField sx={{width: '90px'}} value={targetEditValue} type='number' onChange={({ target }) => {setTargetEditValue(target.value)}} />}
+                    {!targetEditMode&&(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<IconButton onClick={()=>{setTargetEditMode(!targetEditMode); setTargetEditValue(trening.target||0)}}>
                         <EditIcon />
                     </IconButton>}
-                    {targetEditMode&&<IconButton onClick={handleSaveTarget}>
+                    {(targetEditMode||(trening.target===0)||(!trening.hasOwnProperty('target')))&&<IconButton onClick={handleSaveTarget}>
                         <SaveIcon />
                     </IconButton>}
                 </Box>
-                {trening.target&&(trening.target>0)&&<IconButton onClick={()=>plusButton()}>
-                    <AddIcon />
-                </IconButton>}
-                {trening.target&&(trening.target>0)&&<IconButton onClick={()=>restButton()}>
-                    <RestartAltIcon />
-                </IconButton>}
+                <Box sx = {{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'space-evenly', alignItems: 'center', width: '50%', minWidth: '200px' }}>
+                    {(trening.target>0)&&<Box><IconButton sx={{ backgroundColor: 'dimgrey', boxShadow: '0 0 10px dimgrey' }} size="large" onClick={()=>plusButton()}>
+                        <AddIcon fontSize="inherit" />
+                    </IconButton></Box>}
+                    {(trening.target>0)&&(trening.onTarget!==0)&&<IconButton sx={{ backgroundColor: 'black', boxShadow: '0 0 10px dimgrey' }} size="large" onClick={()=>restButton()}>
+                        <RestartAltIcon fontSize="inherit" />
+                    </IconButton>}
+                </Box>
             </Box>
             {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
         </div>

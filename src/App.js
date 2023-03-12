@@ -176,19 +176,19 @@ function Appaa(props) {
           <SMess openNewRowWindow={openNewRowWindow} setOpenNewRowWindow={setOpenNewRowWindow} />
           {loadingInd&&<Loading />}
           {state.login&&<header className="App-header">
-            <Menu user={user} setUser={setUser} state={state} setState={setState} setRows={setRows}/>
+            <Menu user={user} setUser={setUser} state={state} setState={setState} setRows={setRows} setSerials={setSerials} setTrening={setTrening} />
           </header>}
           <ThemeProvider theme={darkTheme}>
           <CssBaseline />
             <div className="workDiv" style={{ 
-                backgroundImage: `url(${background})`,
+                backgroundImage: user?.settings?.animation===3?`url(${background})`:'none',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
                 backgroundSize: 'cover',
-                height: '100vh'
+                height: '100em'
               }}>
               <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} /> }
+                {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setTrening={setTrening} /> }
                 {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setRows = {setRows} /> }
                 {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
                 {(state.login)&&(state.state==='centralPage')&&<CPage rows = {rows} setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }

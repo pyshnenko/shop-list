@@ -18,7 +18,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import MovieIcon from '@mui/icons-material/Movie';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 
-export default function AccountMenu({ user, setUser, state, setState, setRows }) {
+export default function AccountMenu({ user, setUser, state, setState, setRows, setSerials, setTrening }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -47,6 +47,8 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
       setUser({login: '', key: '', token: '', atoken: '', role: '', name: '', last_name: '', first_name: '', email: ''});
       setState({login: false, state: ''});
       setRows([]);
+      setSerials({});
+      setTrening({});
       localStorage.clear();
     }
     else if (ind==='lists') {
@@ -87,7 +89,7 @@ export default function AccountMenu({ user, setUser, state, setState, setRows })
   };
   return (
     <React.Fragment>
-      <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', zIndex: 900000 }}>
         <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}
