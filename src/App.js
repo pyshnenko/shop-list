@@ -82,6 +82,7 @@ function Appaa(props) {
   const [ unRows, setUnRows ] = useState({});
   const [ serials, setSerials ] = useState({});
   const [ trening, setTrening ] = useState({});
+  const [ start, setStart ] = useState(false);
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
@@ -143,24 +144,12 @@ function Appaa(props) {
                 if (res.data.data[0]?.settings?.localSave) localStorage.setItem('listToken', res.data.token);
                 if (localStorage.listState) setState(JSON.parse(localStorage.listState))
               }
-              const serResult = api.sendPost({login: res.data.data[0].login}, 'findSerialList', `Bearer ${res.data.data[0].token}`);
-              serResult.then((serRes)=>{
-                console.log(serRes);
-                if (serRes.status===200) setSerials({...serRes.data, res: true, status: serRes.status});
-                else if(serRes.status===402) setSerials({res: false, status: serRes.status});
-                else setSerials({res: false, status: serRes.status});
-                const trenRes = api.sendPost({login: res.data.data[0].login}, 'findTreningList', `Bearer ${res.data.data[0].token}`);
-                trenRes.then((trenRes)=>{
-                  console.log(serRes);
-                  if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
-                  else if(trenRes.status===402) setTrening({res: false, status: trenRes.status});
-                  else setTrening({res: false, status: trenRes.status});
-                })
-              })
+              setStart(true);              
             })
           }
         })
       }
+      else setStart(true);
     }
   }, [])
 
@@ -187,7 +176,7 @@ function Appaa(props) {
                 backgroundSize: 'cover',
                 height: '100em'
               }}>
-              <div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {start&&<div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setTrening={setTrening} /> }
                 {(!state.login)&&(state.state==='register')&&<Registation data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setRows = {setRows} /> }
                 {(state.state==='unLogin')&&<UnLogin data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} /> }
@@ -198,7 +187,7 @@ function Appaa(props) {
                 {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
                 {(state.login)&&(state.state==='trening')&&<Trenings user={user} setUser={setUser} api={api} trening={trening} setTrening={setTrening} /> }
                 {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
-              </div>
+              </div>}
             </div>
             {(user?.settings?.neonLogo||(!state.login))&&(!isMobile||user?.settings?.mobileLogo||(!state.login))&&<div id="neonDiv"><h2 id="neonH2F">Д</h2><h2 id="neonH2">ызыг</h2><h2 id="neonH2l">н</h2></div>}
           </ThemeProvider>        

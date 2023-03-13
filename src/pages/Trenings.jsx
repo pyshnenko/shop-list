@@ -45,6 +45,7 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     const [ targetEditMode, setTargetEditMode ] = useState(false);
     const [ targetEditValue, setTargetEditValue ] = useState(0);
     const trig = useRef(true);
+    const trig2 = useRef(true);
 
     useEffect(() => {
         const handleResize = (event) => {
@@ -55,6 +56,18 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
                 window.removeEventListener('resize', handleResize);
             };
     }, []);
+
+    useEffect(() => {
+        if (trig2.current) {
+            trig2.current=false;
+            const trenRes = api.sendPost({login: user.login}, 'findTreningList', `Bearer ${user.token}`);
+            trenRes.then((trenRes)=>{
+                if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
+                else if(trenRes.status===402) setTrening({res: false, status: trenRes.status});
+                else setTrening({res: false, status: trenRes.status});
+            })
+        }
+    }, [])
 
     useEffect(()=>{
         if ((!alList.ready)&&(trening.status===402)) {

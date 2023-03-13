@@ -19,7 +19,7 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
         setErrState(eee);
     }
 
-    const loginButton = async (evt) => {
+    const loginButton = (evt) => {
         setLoadingIndex(true);
         evt.preventDefault();
         const answ = api.sendPost({ login: data.log, pass: data.pass }, 'login', '');
@@ -41,48 +41,9 @@ export default function AccountMenu({ user, setRows, setState, data, setData, se
                 if (res.data.data[0]?.settings?.localSave) localStorage.setItem('listToken', res.data.token);
                 if (localStorage.listState) setState(JSON.parse(localStorage.listState))
               }
-              const serResult = api.sendPost({login: res.data.data[0].login}, 'findSerialList', `Bearer ${res.data.data[0].token}`);
-              serResult.then((serRes)=>{
-                console.log(serRes);
-                if (serRes.status===200) setSerials({...serRes.data, res: true, status: serRes.status});
-                else if(serRes.status===402) setSerials({res: false, status: serRes.status});
-                else setSerials({res: false, status: serRes.status});
-                const trenRes = api.sendPost({login: res.data.data[0].login}, 'findTreningList', `Bearer ${res.data.data[0].token}`);
-                trenRes.then((trenRes)=>{
-                  console.log(serRes);
-                  if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
-                  else if(trenRes.status===402) setTrening({res: false, status: trenRes.status});
-                  else setTrening({res: false, status: trenRes.status});
-                })
-              })
             })
           }
         })
-        /*let answ;
-        try {answ = await api.sendPost({ login: data.log, pass: data.pass }, 'login', '')}
-        catch(e){getInfoMessage('error', 'База лежит. сорян', false);}
-        if (answ?.status!==200) {
-            getInfoMessage('error', 'Неверные данные', false);
-        }
-        else {
-            const result = await api.sendPost({name: user.name}, 'lists', `Bearer ${answ.data.data[0].token}`);
-            if (typeof(result.data.lists)==='string') setRows([]);
-            else setRows(result.data.lists);
-            let rdata=answ.data.data[0]
-            setUser(rdata)
-            setState({login: true, state: 'centralPage'});
-            setLabel({log: 'Логин', pass: 'Пароль'});
-            let serialsReq = await api.sendPost({login: user.name}, 'findSerialList', `Bearer ${answ.data.data[0].token}`);
-            if (serialsReq.status===200) setSerials({...serialsReq.data, res: true, status: serialsReq.status});
-            else if(serialsReq.status===402) setSerials({res: false, status: serialsReq.status});
-            else setSerials({res: false, status: serialsReq.status});
-            let trenRes = await api.sendPost({login: user.name}, 'findTreningList', `Bearer ${answ.data.data[0].token}`);
-            if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
-            else if(trenRes.status===402) setTrening({res: false, status: trenRes.status});
-            else setTrening({res: false, status: trenRes.status});
-            getInfoMessage('success', 'Данные получены', false);
-            if (rdata?.settings?.localSave) localStorage.setItem('listToken', answ.data.data[0].token)
-        }*/
     }
 
     const regButton = async (evt) => {

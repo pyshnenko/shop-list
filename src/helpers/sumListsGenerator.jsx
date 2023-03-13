@@ -97,7 +97,9 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
             let lists = api.sendPost({}, 'sumLists', `Bearer ${user.token}`);
             lists.then((res)=>{
                 console.log(res)
-                setSumLists(res.data.sumLists)
+                if (res.status===200)
+                    setSumLists(res.data.sumLists)
+                else setSumLists([]);
                 getInfoMessage('success', 'Обновлено', false);
             })
         }
@@ -267,7 +269,7 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
         <Box sx={{ marginTop: 5 }}>
             {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
             {sumLists.map((data, list)=>{ return (
-                <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={list}><Accordion sx={{ boxShadow: 3 }} key={list}>
+                <Grow in={true} timeout={1000 * (list+rows.length)} appear={user.settings.grow} key={list}><Accordion sx={{ boxShadow: 3 }} key={list}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         key={list}

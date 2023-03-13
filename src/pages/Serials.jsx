@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -25,6 +25,8 @@ export default function Serials({ user, setUser, api, serials, setSerials }) {
     const [ width, setWidth ] = useState(window.innerWidth);
     const [ edit, setEdit ] = useState({old: '', new: ''});
 
+    const trig = useRef(true);
+
     useEffect(() => {
         const handleResize = (event) => {
             setWidth(event.target.innerWidth);
@@ -35,8 +37,19 @@ export default function Serials({ user, setUser, api, serials, setSerials }) {
             };
     }, []);
 
+    useEffect(() => {
+        if (trig.current) {
+            trig.current=false;
+            const serResult = api.sendPost({login: user.login}, 'findSerialList', `Bearer ${user.token}`);
+            serResult.then((serRes)=>{
+                if (serRes.status===200) setSerials({...serRes.data, res: true, status: serRes.status});
+                else if(serRes.status===402) setSerials({res: false, status: serRes.status});
+                else setSerials({res: false, status: serRes.status});
+            })
+        }
+    }, [])
+
     useEffect(()=>{
-        console.log(serials);
         if ((!alList.ready)&&(serials.status===402)) {
             console.log('aaaa')
             setAlList({text: 'Создадим хранилище?', ready: false, result: false, visible: true, make: 'create'})
