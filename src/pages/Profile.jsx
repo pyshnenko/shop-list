@@ -106,8 +106,8 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
         const options = {
             method: 'POST',
             headers: {
-                login: user.login,
-                fname: event.target.files[0].name
+                login: encodeURI(user.login),
+                fname: encodeURI(event.target.files[0].name)
             },
             body: data,
         }

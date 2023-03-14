@@ -36,7 +36,7 @@ const BorderLinearProgress = styled(LinearProgress)(({ theme, value }) => ({
     },
 }));
 
-export default function Trening({ user, setUser, api, trening, setTrening }) { 
+export default function Trening({ treningTrig, user, setUser, api, trening, setTrening }) { 
     
     const [ expanded, setExpanded ] = useState(false);
     const [ alList, setAlList ] = useState({text: '', ready: false, result: false, visible: false, make: ''});
@@ -45,7 +45,6 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     const [ targetEditMode, setTargetEditMode ] = useState(false);
     const [ targetEditValue, setTargetEditValue ] = useState(0);
     const trig = useRef(true);
-    const trig2 = useRef(true);
 
     useEffect(() => {
         const handleResize = (event) => {
@@ -58,8 +57,9 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     }, []);
 
     useEffect(() => {
-        if (trig2.current) {
-            trig2.current=false;
+        if (treningTrig.current) {
+            console.log('start')
+            treningTrig.current=false;
             const trenRes = api.sendPost({login: user.login}, 'findTreningList', `Bearer ${user.token}`);
             trenRes.then((trenRes)=>{
                 if (trenRes.status===200) setTrening({...trenRes.data, res: true, status: trenRes.status});
@@ -70,6 +70,7 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
     }, [])
 
     useEffect(()=>{
+        console.log('trening')
         if ((!alList.ready)&&(trening.status===402)) {
             console.log('aaaa')
             setAlList({text: 'Создадим хранилище?', ready: false, result: false, visible: true, make: 'create'})
@@ -78,7 +79,8 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
             let buf = {...trening, categories: {'Без категории': {}}};
             setTrening(buf);
         }
-        if ((trening.status===200)&&(trig)) {
+        if ((trening.status===200)&&(trig.current)) {
+            console.log(trig)
             trig.current = false;
             let buf = {...trening};
             let sDate = trening.date ? new Date(trening.date) : new Date();
@@ -183,10 +185,11 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
         let sDate = trening.date ? (new Date(trening.date)) : (new Date());
         let rDate = new Date();
         if ((rDate.getFullYear()===sDate.getFullYear())&&(rDate.getMonth()===sDate.getMonth()))
-            buf.onTarget ? buf.onTarget=buf.onTarget+1 : buf.onTarget=1;
+            buf.onTarget ? buf.onTarget++ : buf.onTarget=1;
         else buf.onTarget = 1;
         buf.date = Number(sDate);
         let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
+        console.log(res.data)
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
             setTrening({...res.data, status: res.status, res: true});
@@ -273,7 +276,7 @@ export default function Trening({ user, setUser, api, trening, setTrening }) {
                     flexDirection: 'column',
                     alignItems: 'center'
                 }}>
-                {(trening.target===trening.onTarget)&&(trening.target!==0)&&(trening.target)&&<Box sx={{ 
+                {(trening.target<=trening.onTarget)&&(trening.target!==0)&&(trening.target)&&<Box sx={{ 
                         display: 'flex', 
                         flexDirection: 'row',
                         flexWrap: 'nowrap',

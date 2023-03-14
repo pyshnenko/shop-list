@@ -26,6 +26,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
 import {Route, Routes, BrowserRouter as Router} from 'react-router-dom';
 import Form from './pages/botPages/form';
+import Trening from './pages/botPages/trening';
 
 const api = new sendApi ('https://spamigor.site/api');
 
@@ -37,7 +38,8 @@ const darkTheme = createTheme({
 
 function App(props)  {
   const {onToggleButton, tg} = useTelegram();  
-  const [ form, setForm ] = useState(false)
+  const [ form, setForm ] = useState(false);  
+  const [ tren, setTren ] = useState(false);
   const trigger3 = useRef(true);
 
   useEffect(() => {
@@ -48,9 +50,13 @@ function App(props)  {
     if (trigger3.current) {
       trigger3.current = false;
       const params = new URLSearchParams(window.location.search);
-      let form = params.get('form');
-      if (form) {
+      let form2 = params.get('form');
+      let tren2 = params.get('trening');
+      if (form2) {
         setForm(true);
+      }
+      if (tren2) {
+        setTren(true);
       }
     }
   }, []);
@@ -61,10 +67,12 @@ function App(props)  {
     <div className="App">
       <Router>
         <Routes>
-          <Route path="/" element={form ? <Form /> : <Appaa />}/>
-          <Route path="/build?" element={form ? <Form /> : <Appaa />}/>
+          <Route path="/" element={form ? <Form /> : tren ? <Trening api={api} /> : <Appaa />}/>
+          <Route path="/build?" element={form ? <Form /> : tren ? <Trening api={api} /> : <Appaa />}/>
           <Route path="/form" element={<Form />}/>
           <Route path="/build/form?" element={<Form />}/>
+          <Route path="/trening" element={<Trening api={api} />}/>
+          <Route path="/build/trening?" element={<Trening api={api} />}/>
         </Routes>
       </Router>
     </div>
@@ -86,6 +94,7 @@ function Appaa(props) {
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
+  const treningTrig = useRef(true);
 
   const {onToggleButton, tg} = useTelegram();
 
@@ -155,7 +164,8 @@ function Appaa(props) {
 
   useEffect(() => {
     if ((state.login)&&(user?.settings?.pageSave)) localStorage.setItem('listState', JSON.stringify(state))
-    if ((state.login)&&(state.state==='')) setState({login: true, state: 'centralPage'})
+    if ((state.login)&&(state.state==='')) setState({login: true, state: 'centralPage'});
+    treningTrig.current = true;
   }, [state]);
   
   return (
@@ -185,7 +195,7 @@ function Appaa(props) {
                 {(state.login)&&(state.state==='addfriend')&&<SeechUser user={user} setUser={setUser} api={api} /> }
                 {(state.login)&&(state.state==='settings')&&<Settings user={user} setUser={setUser} api={api} /> }
                 {(state.login)&&(state.state==='serials')&&<Serials user={user} setUser={setUser} api={api} serials={serials} setSerials={setSerials} /> }
-                {(state.login)&&(state.state==='trening')&&<Trenings user={user} setUser={setUser} api={api} trening={trening} setTrening={setTrening} /> }
+                {(state.login)&&(state.state==='trening')&&<Trenings treningTrig={treningTrig} user={user} setUser={setUser} api={api} trening={trening} setTrening={setTrening} /> }
                 {(!state.login)&&(state.state==='unLoginAdm')&&<UnLoginAdm api={api} state={state} setState={setState} unRows={unRows} setUnRows={setUnRows} />}
               </div>}
             </div>
