@@ -165,26 +165,26 @@ export default function TreningTable({trening, setTrening, itemS, user, darkMode
                     : !(trening.categories[itemS]) ? null : Object.keys(trening.categories[itemS])
                 ).map((row) => (
                     <TableRow key={row}>
-                        <TableCell component="th" scope="row" style={{ padding: width>500? 10 : 5, color: darkMode?'#BDC4C4':'black' }}>
+                        {row!=='target'&&row!=='onTarget'&&row!=='date'&&<TableCell component="th" scope="row" style={{ padding: width>500? 10 : 5, color: darkMode?'#BDC4C4':'black' }}>
                             {row}
-                        </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5, color: darkMode?'#BDC4C4':'black' }} align="center">
+                        </TableCell>}
+                        {row!=='target'&&row!=='onTarget'&&row!=='date'&&<TableCell style={{ width: width < 500 ? 30 : 60, padding: width>500? 10 : 5, color: darkMode?'#BDC4C4':'black' }} align="center">
                             {trening.categories[itemS][row].w}
-                        </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
+                        </TableCell>}
+                        {row!=='target'&&row!=='onTarget'&&row!=='date'&&<TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
                         <IconButton sx={{ padding: 0 }}
                             onClick={()=>setNewTrening({name: row, w: trening.categories[itemS][row].w})}
                         >
                             <EditIcon sx={{color: '#3E6E3E'}} />
                         </IconButton>
-                        </TableCell>
-                        <TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
+                        </TableCell>}
+                        {row!=='target'&&row!=='onTarget'&&row!=='date'&&<TableCell style={{ width: width < 500 ? 30 : 40, height: width>500?60:40, padding: width>500? 5 : 0 }} align="center">
                         <IconButton sx={{ padding: 0 }}
                             onClick={()=>setAlList({text: `Удаляем "${row}"?`, ready: false, result: false, visible: true, make: `@del:${row}`})}
                         >
                             <DeleteIcon sx={{color: '#794545'}} />
                         </IconButton>
-                        </TableCell>
+                        </TableCell>}
                     </TableRow>
                 ))}
                 </TableBody>

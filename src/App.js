@@ -61,10 +61,13 @@ function App(props)  {
         <Routes>
           <Route path="/" element={form ? <Form /> : tren ? <Trening api={api} /> : <Appaa />}/>
           <Route path="/build?" element={form ? <Form /> : tren ? <Trening api={api} /> : <Appaa />}/>
+          <Route path="/list?" element={form ? <Form /> : tren ? <Trening api={api} /> : <Appaa />}/>
           <Route path="/form" element={<Form />}/>
           <Route path="/build/form?" element={<Form />}/>
+          <Route path="/list/form?" element={<Form />}/>
           <Route path="/trening" element={<Trening api={api} />}/>
           <Route path="/build/trening?" element={<Trening api={api} />}/>
+          <Route path="/list/trening?" element={<Trening api={api} />}/>
         </Routes>
       </Router>
     </div>

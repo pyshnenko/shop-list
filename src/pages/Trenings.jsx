@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Grow from '@mui/material/Grow';
 import YorNallert from '../helpers/yORnAllert';
 import TreningTable from '../helpers/treningTable';
+import TreningCount from '../helpers/treningCount';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
 import SaveIcon from '@mui/icons-material/Save';
@@ -17,29 +18,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import IconButton from '@mui/material/IconButton';
 import CheckIcon from '@mui/icons-material/Check';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import { styled } from '@mui/material/styles';
-import AccessibleForwardIcon from '@mui/icons-material/AccessibleForward';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
-import 'dayjs/locale/ru';
-
-
-const BorderLinearProgress = styled(LinearProgress)(({ theme, value }) => ({
-    height: 10,
-    borderRadius: '30px',
-    [`&.${linearProgressClasses.colorPrimary}`]: {
-    backgroundColor: theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
-    },
-    [`& .${linearProgressClasses.bar}`]: {
-    borderRadius: 30,
-    boxShadow: `0 0 20px rgb(${(2*255-2*2.55*value)<=255?(2*255-2*2.55*value):255},${(2*2.55*value)<=255?(2*2.55*value):255},0)`,
-    backgroundColor: `rgb(${(2*255-2*2.55*value)<=255?(2*255-2*2.55*value):255},${(2*2.55*value)<=255?(2*2.55*value):255},0)`,
-    },
-}));
 
 export default function Trening({ treningTrig, user, setUser, api, trening, setTrening, darkMode }) { 
     
@@ -47,8 +25,6 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
     const [ alList, setAlList ] = useState({text: '', ready: false, result: false, visible: false, make: ''});
     const [ width, setWidth ] = useState(window.innerWidth);
     const [ edit, setEdit ] = useState({old: '', new: ''});
-    const [ targetEditMode, setTargetEditMode ] = useState(false);
-    const [ targetEditValue, setTargetEditValue ] = useState(0);
     const [ dateUpd, setDateUpd] = useState(null);
     const trig = useRef(true);
 
@@ -169,54 +145,6 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
         setEdit({old: '', new: ''});
     }
 
-    const handleSaveTarget = async (onlySave) => {
-        setTargetEditMode(false);
-        if ((targetEditValue!==trening.target)||(onlySave)) {
-            setLoadingIndex(true);
-            let buf = trening;
-            if (!onlySave) {
-                buf.target = Number(targetEditValue);
-                buf.date = Number(new Date());
-            }
-            if (!buf.hasOwnProperty('onTarget')) buf.onTarget=0;
-            let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-            if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
-            else {
-                setTrening({...res.data, status: res.status, res: true});
-                getInfoMessage('success', 'Данные получены', false);
-            }
-        }
-    }
-
-    const plusButton = async () => {
-        setLoadingIndex(true);
-        let buf = trening;
-        buf.onTarget ? buf.onTarget++ : buf.onTarget=1;
-        if (!buf.date) buf.date = Number(new Date((new Date()).setMonth((new Date).getMonth()+1)));
-        let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-        console.log(res.data)
-        if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
-        else {
-            setTrening({...res.data, status: res.status, res: true});
-            getInfoMessage('success', 'Данные получены', false);
-        }
-    }
-
-    const restButton = async () => {
-        setLoadingIndex(true);
-        let buf = trening; 
-        let sDate = trening.date ? (new Date(trening.date)) : (new Date());
-        buf.date = Number(sDate);
-        buf.onTarget=0;
-        console.log(buf);
-        let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-        if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
-        else {
-            setTrening({...res.data, status: res.status, res: true});
-            getInfoMessage('success', 'Данные получены', false);
-        }
-    }
-
     return (
         <div>
             <Box sx={{position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999, display: 'flex', flexDirection: 'column-reverse', padding: width>500?'20px':0}}>
@@ -263,67 +191,15 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
                                     </AccordionSummary>
                                     <AccordionDetails sx={{ padding: width<500?'8px 4px 16px':'8px 16px 16px' }}>
                                         <TreningTable trening={trening} setTrening={setTrening} itemS={item} user={user} />
+                                        {expanded===index&&<TreningCount trening={trening} setTrening={setTrening} api={api} cat={['categories',item]} darkMode={darkMode} user={user} />}
                                     </AccordionDetails>
                                 </Accordion>
                             </Grow>
                         </div>
                     )
                 })}
-            </Box>}
-            <Box sx={{ 
-                    backgroundColor: darkMode?'black':'#c7c7c7', 
-                    padding: '20px', 
-                    margin: '20px',
-                    borderRadius: '30px', 
-                    border: '2px solid white',
-                    boxShadow: '0 0 10px white',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center'
-                }}>
-                {(trening.target<=trening.onTarget)&&(trening.target!==0)&&(trening.target)&&<Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'row',
-                        flexWrap: 'nowrap',
-                        alignItems: 'center',
-                        marginBottom: 2 
-                    }}>
-                    <AccessibleForwardIcon sx={{transform: 'scale(-1, 1)' }} />
-                    <Typography>Успех!!!</Typography>
-                    <AccessibleForwardIcon />
-                </Box>}
-                {(!trening.hasOwnProperty('target')||trening.target<=0)&&<Typography>Давай зададим цель на этот месяц</Typography>}
-                {(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<BorderLinearProgress sx = {{ height: '30px', borderRadius: '30px', width: '100%' }} variant="determinate" value={(100*((trening.onTarget||0)/(trening.target||1)))>100?100:100*((trening.onTarget||0)/(trening.target||1))} />}
-                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', alignContent: 'center', justifyContent: 'center' }}>
-                    {!targetEditMode&&(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<Typography sx={{margin: 2}}>Твой прогресс: {trening.onTarget||0} из {trening.target||0}</Typography>}
-                    {(targetEditMode||(trening.target===0)||(!trening.hasOwnProperty('target')))&&<TextField sx={{width: '90px'}} value={targetEditValue} type='number' onChange={({ target }) => {setTargetEditValue(target.value)}} />}
-                    {!targetEditMode&&(trening.target!==0)&&(trening.hasOwnProperty('target'))&&<IconButton onClick={()=>{setTargetEditMode(!targetEditMode); setTargetEditValue(trening.target||0)}}>
-                        <EditIcon />
-                    </IconButton>}
-                    {(targetEditMode||(trening.target===0)||(!trening.hasOwnProperty('target')))&&<IconButton onClick={handleSaveTarget}>
-                        <SaveIcon />
-                    </IconButton>}
-                </Box>
-                <Box sx = {{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', justifyContent: 'space-evenly', alignItems: 'center', width: '50%', minWidth: '200px' }}>
-                    {(trening.target>0)&&<Box><IconButton sx={{ backgroundColor: darkMode?'dimgrey':'lightgreen', boxShadow: '0 0 10px dimgrey' }} size="large" onClick={()=>plusButton()}>
-                        <AddIcon fontSize="inherit" />
-                    </IconButton></Box>}
-                    {(trening.target>0)&&(trening.onTarget!==0)&&<IconButton sx={{ backgroundColor: darkMode?'black':'white', boxShadow: '0 0 10px dimgrey' }} size="large" onClick={()=>restButton()}>
-                        <RestartAltIcon fontSize="inherit" />
-                    </IconButton>}
-                </Box>
-                <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                    <Typography sx={{marginTop: 2}}>Счетчик обновится:</Typography>
-                    <Box sx={{display: 'flex', alignItems: 'center'}}>
-                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ru'>
-                            <DatePicker sx={{width: '150px'}} value={dayjs((trening.date ? (new Date(trening.date)) : (new Date())).toDateString())} onChange={(val)=>setTrening({...trening, date: (Number(val.$d))})} />
-                        </LocalizationProvider>
-                        <IconButton onClick={()=>handleSaveTarget(true)}>
-                            <SaveIcon />
-                        </IconButton>
-                    </Box>
-                </Box>
-            </Box>
+            </Box>} 
+            <TreningCount trening={trening} setTrening={setTrening} api={api} cat={[]} darkMode={darkMode} user={user} />           
             {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
         </div>
       );
