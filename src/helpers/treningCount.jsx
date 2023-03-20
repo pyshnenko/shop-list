@@ -46,7 +46,7 @@ const revObj = (obj, cat) => {
 }
 
 const saveRevObj = (obj, sObj, cat) => {
-    if (cat.length===0) return obj;
+    if (cat.length===0) return {...obj, ...sObj};
     else if (cat.length===1) {obj[cat[0]]=sObj; return obj}
     else if (cat.length===2) {obj[cat[0]][cat[1]]=sObj; return obj}
 }
@@ -80,7 +80,10 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
     }, [])
 
     useEffect(()=>{
-        if (cat.length===0) setTrening(inpTrening)
+        if (cat.length===0) {
+            let buf = {...trening, ...inpTrening};
+            setTrening(buf)
+        }
         else {
             let buf = trening;
             setTrening(saveRevObj(buf, inpTrening, cat));
@@ -131,6 +134,7 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
             setTrening({...res.data, status: res.status, res: true});
+            setInpTrening(cat.length===0?{...res.data, status: res.status, res: true}:revObj({...res.data, status: res.status, res: true}, cat));
             getInfoMessage('success', 'Данные получены', false);
         }
     }
@@ -147,6 +151,7 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
             setTrening({...res.data, status: res.status, res: true});
+            setInpTrening(cat.length===0?{...res.data, status: res.status, res: true}:revObj({...res.data, status: res.status, res: true}, cat));
             getInfoMessage('success', 'Данные получены', false);
         }
     }

@@ -26,6 +26,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
     const [ width, setWidth ] = useState(window.innerWidth);
     const [ edit, setEdit ] = useState({old: '', new: ''});
     const [ dateUpd, setDateUpd] = useState(null);
+    const [ ready, setReady ] = useState(false);
     const trig = useRef(true);
 
     useEffect(() => {
@@ -75,6 +76,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
             }
             setTrening(buf);
             setDateUpd(buf.date);
+            setReady(true)
         }
     }, [trening])
 
@@ -199,7 +201,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
                     )
                 })}
             </Box>} 
-            <TreningCount trening={trening} setTrening={setTrening} api={api} cat={[]} darkMode={darkMode} user={user} />           
+            {ready&&<TreningCount trening={trening} setTrening={setTrening} api={api} cat={[]} darkMode={darkMode} user={user} />}
             {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
         </div>
       );
