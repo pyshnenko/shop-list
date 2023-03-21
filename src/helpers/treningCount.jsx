@@ -77,7 +77,46 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
     }, [])
 
     useEffect(()=>{
-        setInpTrening(revObj(trening, cat))
+        let buf = {...trening};
+        if (cat.length===0) {
+            if (buf.date<Number(new Date())) {
+                setLoadingIndex(true);
+                buf.onTarget = 0;
+                let rDate = new Date();
+                let sDate = new Date(rDate.setDate((new Date(buf.date)).getDate()));
+                sDate.setMilliseconds(0);
+                sDate.setSeconds(0);
+                sDate.setMinutes(0);
+                sDate.setHours(0);
+                sDate.setMonth(sDate.getMonth()+1)
+                buf.date = Number(sDate);
+                let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
+                res.then((result)=>{
+                    if (result.status===200) setTrening({...res.data, status: res.status, res: true})
+                    getInfoMessage('success', 'Данные получены', false);
+                })
+            }
+        }
+        else if (cat.length===2) {
+            if (buf[cat[0]][cat[1]].date<Number(new Date())) {
+                setLoadingIndex(true);
+                buf[cat[0]][cat[1]].onTarget = 0;
+                let rDate = new Date();
+                let sDate = new Date(rDate.setDate((new Date(buf[cat[0]][cat[1]].date)).getDate()));
+                sDate.setMilliseconds(0);
+                sDate.setSeconds(0);
+                sDate.setMinutes(0);
+                sDate.setHours(0);
+                sDate.setMonth(sDate.getMonth()+1)
+                buf[cat[0]][cat[1]].date = Number(sDate);
+                let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
+                res.then((result)=>{
+                    if (result.status===200) setTrening({...res.data, status: res.status, res: true})
+                    getInfoMessage('success', 'Данные получены', false);
+                })
+            }
+        }
+        setInpTrening(revObj(buf, cat));
     }, [trening])
     
     const handleSaveTarget = async (onlySave) => {
