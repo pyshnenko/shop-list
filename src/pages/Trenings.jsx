@@ -192,7 +192,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
                                         </Box>
                                     </AccordionSummary>
                                     <AccordionDetails sx={{ padding: width<500?'8px 4px 16px':'8px 16px 16px' }}>
-                                        <TreningTable trening={trening} setTrening={setTrening} itemS={item} user={user} />
+                                        <TreningTable trening={trening} setTrening={setTrening} itemS={item} user={user} darkMode={darkMode} />
                                         {expanded===index&&<TreningCount trening={trening} setTrening={setTrening} api={api} cat={['categories',item]} darkMode={darkMode} user={user} />}
                                     </AccordionDetails>
                                 </Accordion>

@@ -52,14 +52,12 @@ const saveRevObj = (obj, sObj, cat) => {
 }
 
 export default function CountTrening({ trening, setTrening, api, cat, darkMode, user }) {
-    
+
     const [ targetEditMode, setTargetEditMode ] = useState(false);
     const [ targetEditValue, setTargetEditValue ] = useState(0);
     const [ inpTrening, setInpTrening ] = useState(cat.length===0?trening:revObj(trening, cat));
 
     useEffect(()=>{
-        console.log('work');
-        console.log(cat);
         if (cat.length===0) {
             let buf = copy(trening);
             if (!((buf.hasOwnProperty('target'))||(buf.target===0))) buf.target=0;
@@ -68,7 +66,6 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
             setInpTrening(buf);
         }
         else {
-            console.log(trening);
             let buf = revObj(copy(trening), cat);
             if (buf!==undefined) {
                 if (!((buf.hasOwnProperty('target'))||(buf.target===0))) buf.target=0;
@@ -80,15 +77,8 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
     }, [])
 
     useEffect(()=>{
-        if (cat.length===0) {
-            let buf = {...trening, ...inpTrening};
-            setTrening(buf)
-        }
-        else {
-            let buf = trening;
-            setTrening(saveRevObj(buf, inpTrening, cat));
-        }
-    }, [inpTrening])
+        setInpTrening(revObj(trening, cat))
+    }, [trening])
     
     const handleSaveTarget = async (onlySave) => {
         setTargetEditMode(false);
@@ -134,7 +124,6 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
             setTrening({...res.data, status: res.status, res: true});
-            setInpTrening(cat.length===0?{...res.data, status: res.status, res: true}:revObj({...res.data, status: res.status, res: true}, cat));
             getInfoMessage('success', 'Данные получены', false);
         }
     }
@@ -151,9 +140,18 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
         else {
             setTrening({...res.data, status: res.status, res: true});
-            setInpTrening(cat.length===0?{...res.data, status: res.status, res: true}:revObj({...res.data, status: res.status, res: true}, cat));
             getInfoMessage('success', 'Данные получены', false);
         }
+    }
+
+    const saveDate = (date) => {
+        let buf = {...trening};
+        switch (cat.length) {
+            case 0: buf.date = date; break;
+            case 1: buf[cat[0]].date = date; break;
+            case 2: buf[cat[0]][cat[1]].date = date; break;
+        }
+        setTrening(buf)
     }
 
     return (
@@ -204,7 +202,7 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
                     <Typography sx={{marginTop: 2}}>Счетчик обновится:</Typography>
                     <Box sx={{display: 'flex', alignItems: 'center'}}>
                         <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale='ru'>
-                            <DatePicker sx={{width: '150px'}} value={dayjs((inpTrening.date ? (new Date(inpTrening.date)) : (new Date())).toDateString())} onChange={(val)=>setInpTrening({...inpTrening, date: (Number(val.$d))})} />
+                            <DatePicker sx={{width: '150px'}} value={dayjs((inpTrening.date ? (new Date(inpTrening.date)) : (new Date())).toDateString())} onChange={(val)=>saveDate(Number(val.$d))} />
                         </LocalizationProvider>
                         <IconButton onClick={()=>handleSaveTarget(true)}>
                             <SaveIcon />
