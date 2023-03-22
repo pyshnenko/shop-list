@@ -51,79 +51,88 @@ const saveRevObj = (obj, sObj, cat) => {
     else if (cat.length===2) {obj[cat[0]][cat[1]]=sObj; return obj}
 }
 
-export default function CountTrening({ trening, setTrening, api, cat, darkMode, user }) {
+export default function CountTrening({ setReady, trening, setTrening, api, cat, darkMode, user }) {
 
     const [ targetEditMode, setTargetEditMode ] = useState(false);
     const [ targetEditValue, setTargetEditValue ] = useState(0);
     const [ inpTrening, setInpTrening ] = useState(cat.length===0?trening:revObj(trening, cat));
+    const trig = useRef(true);
 
     useEffect(()=>{
-        if (cat.length===0) {
-            let buf = copy(trening);
-            if (!((buf.hasOwnProperty('target'))||(buf.target===0))) buf.target=0;
-            if (!((buf.hasOwnProperty('onTarget'))||(buf.onTarget===0))) buf.onTarget=0;
-            if (!(buf.hasOwnProperty('date'))) buf.date=(new Date()).setMonth((new Date()).getMonth()+1);
-            setInpTrening(buf);
-        }
-        else {
-            let buf = revObj(copy(trening), cat);
-            if (buf!==undefined) {
+        if (trig.current) {
+            trig.current = false;
+            console.log('rend');
+            if (cat.length===0) {
+                let buf = copy(trening);
                 if (!((buf.hasOwnProperty('target'))||(buf.target===0))) buf.target=0;
                 if (!((buf.hasOwnProperty('onTarget'))||(buf.onTarget===0))) buf.onTarget=0;
                 if (!(buf.hasOwnProperty('date'))) buf.date=(new Date()).setMonth((new Date()).getMonth()+1);
                 setInpTrening(buf);
+            }
+            else {
+                let buf = revObj(copy(trening), cat);
+                if (buf!==undefined) {
+                    if (!((buf.hasOwnProperty('target'))||(buf.target===0))) buf.target=0;
+                    if (!((buf.hasOwnProperty('onTarget'))||(buf.onTarget===0))) buf.onTarget=0;
+                    if (!(buf.hasOwnProperty('date'))) buf.date=(new Date()).setMonth((new Date()).getMonth()+1);
+                    setInpTrening(buf);
+                }
             }
         }
     }, [])
 
     useEffect(()=>{
         let buf = {...trening};
-        if (cat.length===0) {
-            if (buf.date<Number(new Date())) {
-                setLoadingIndex(true);
-                buf.onTarget = 0;
-                let rDate = new Date();
-                let sDate = new Date(rDate.setDate((new Date(buf.date)).getDate()));
-                sDate.setMilliseconds(0);
-                sDate.setSeconds(0);
-                sDate.setMinutes(0);
-                sDate.setHours(0);
-                sDate.setMonth(sDate.getMonth()+1)
-                buf.date = Number(sDate);
-                let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-                res.then((result)=>{
-                    if (result.status===200) setTrening({...res.data, status: res.status, res: true})
-                    getInfoMessage('success', 'Данные получены', false);
-                })
+        console.log(buf)
+        if (buf.status===200) {
+            if (cat.length===0) {
+                if (buf.date<Number(new Date())) {
+                    setLoadingIndex(true);
+                    buf.onTarget = 0;
+                    let rDate = new Date();
+                    let sDate = new Date(rDate.setDate((new Date(buf.date)).getDate()));
+                    sDate.setMilliseconds(0);
+                    sDate.setSeconds(0);
+                    sDate.setMinutes(0);
+                    sDate.setHours(0);
+                    sDate.setMonth(sDate.getMonth()+1)
+                    buf.date = Number(sDate);
+                    let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
+                    res.then((result)=>{
+                        if (result.status===200) setTrening({...res.data, status: res.status, res: true})
+                        getInfoMessage('success', 'Данные получены', false);
+                    })
+                }
             }
-        }
-        else if (cat.length===2) {
-            if (buf[cat[0]][cat[1]].date<Number(new Date())) {
-                setLoadingIndex(true);
-                buf[cat[0]][cat[1]].onTarget = 0;
-                let rDate = new Date();
-                let sDate = new Date(rDate.setDate((new Date(buf[cat[0]][cat[1]].date)).getDate()));
-                sDate.setMilliseconds(0);
-                sDate.setSeconds(0);
-                sDate.setMinutes(0);
-                sDate.setHours(0);
-                sDate.setMonth(sDate.getMonth()+1)
-                buf[cat[0]][cat[1]].date = Number(sDate);
-                let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-                res.then((result)=>{
-                    if (result.status===200) setTrening({...res.data, status: res.status, res: true})
-                    getInfoMessage('success', 'Данные получены', false);
-                })
+            else if (cat.length===2) {
+                if (buf[cat[0]][cat[1]].date<Number(new Date())) {
+                    setLoadingIndex(true);
+                    buf[cat[0]][cat[1]].onTarget = 0;
+                    let rDate = new Date();
+                    let sDate = new Date(rDate.setDate((new Date(buf[cat[0]][cat[1]].date)).getDate()));
+                    sDate.setMilliseconds(0);
+                    sDate.setSeconds(0);
+                    sDate.setMinutes(0);
+                    sDate.setHours(0);
+                    sDate.setMonth(sDate.getMonth()+1)
+                    buf[cat[0]][cat[1]].date = Number(sDate);
+                    let res = api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
+                    res.then((result)=>{
+                        if (result.status===200) setTrening({...res.data, status: res.status, res: true})
+                        getInfoMessage('success', 'Данные получены', false);
+                    })
+                }
             }
+            setInpTrening(revObj(buf, cat));
         }
-        setInpTrening(revObj(buf, cat));
     }, [trening])
     
     const handleSaveTarget = async (onlySave) => {
         setTargetEditMode(false);
-        if ((targetEditValue!==inpTrening.target)||(onlySave)) {
+        if ((Number(targetEditValue)!==inpTrening.target)||(onlySave)) {
             setLoadingIndex(true);
-            let buf = trening;
+            let buf = {...trening};
+            delete(buf.status);
             if (!onlySave) {
                 if (cat.length===0) {
                     buf.target = Number(targetEditValue);
@@ -141,11 +150,11 @@ export default function CountTrening({ trening, setTrening, api, cat, darkMode, 
                 else saveRevObj(buf, {onTarget: 0}, cat);
             }
             let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
-            if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
-            else {
+            if (res.status===200) {
                 setTrening({...res.data, status: res.status, res: true});
                 getInfoMessage('success', 'Данные получены', false);
             }
+            else getInfoMessage('error', 'Что-то пошло не так', false); 
         }
     }
 

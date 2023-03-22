@@ -53,30 +53,33 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
     }, [])
 
     useEffect(()=>{
-        if ((!alList.ready)&&(trening.status===402)) {
-            console.log('aaaa')
-            setAlList({text: 'Создадим хранилище?', ready: false, result: false, visible: true, make: 'create'})
-        }
-        if (!trening.hasOwnProperty('categories')) {
-            let buf = {...trening, categories: {'Без категории': {}}};
-            setTrening(buf);
-        }
-        if ((trening.status===200)&&(trig.current)) {
-            trig.current = false;
-            let buf = {...trening};
-            let sDate = trening.date ? new Date(trening.date) : new Date();
-            let rDate = new Date();
-            if (sDate>rDate)
-                buf.onTarget = trening.onTarget || 0;
-            else {
-                buf.onTarget = 0;
-                let jDate = new Date(sDate.setMonth((new Date()).getMonth()+1));
-                if (jDate.getMonth()===(sDate.getMonth()+1)) jDate.setDate(1);
-                buf.date = Number(jDate);
+        console.log(trening.status);
+        if (trening.status!==undefined) {
+            if ((!alList.ready)&&(trening.status===402)) {
+                console.log('aaaa')
+                setAlList({text: 'Создадим хранилище?', ready: false, result: false, visible: true, make: 'create'})
             }
-            setTrening(buf);
-            setDateUpd(buf.date);
-            setReady(true)
+            if (!trening.hasOwnProperty('categories')) {
+                let buf = {...trening, categories: {'Без категории': {}}};
+                setTrening(buf);
+            }
+            if ((trening.status===200)&&(trig.current)) {
+                trig.current = false;
+                let buf = {...trening};
+                let sDate = trening.date ? new Date(trening.date) : new Date();
+                let rDate = new Date();
+                if (sDate>rDate)
+                    buf.onTarget = trening.onTarget || 0;
+                else {
+                    buf.onTarget = 0;
+                    let jDate = new Date(sDate.setMonth((new Date()).getMonth()+1));
+                    if (jDate.getMonth()===(sDate.getMonth()+1)) jDate.setDate(1);
+                    buf.date = Number(jDate);
+                }
+                setTrening(buf);
+                setDateUpd(buf.date);
+                setReady(true);
+            }
         }
     }, [trening])
 
@@ -113,7 +116,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
 
     const addCategory = () => {
         console.log('add category');
-        let buf = trening;
+        let buf = {...trening};
         const name = 'Новая категория';
         let setName = name;
         let count = 1;
@@ -128,7 +131,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
 
     const saveButton = async () => {
         setLoadingIndex(true);
-        let buf = trening; 
+        let buf = {...trening}; 
         delete(buf.status);
         let res = await api.sendPost(buf, 'updateTreningList', `Bearer ${user.token}`);
         if (res.status!==200) getInfoMessage('error', 'Что-то пошло не так', false);
@@ -139,7 +142,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
     }
 
     const checkEdit = () => {
-        let buf = trening;
+        let buf = {...trening};
         let subBuf = trening.categories[edit.old];
         delete(buf.categories[edit.old]);
         buf.categories[edit.new]=subBuf;
@@ -193,7 +196,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
                                     </AccordionSummary>
                                     <AccordionDetails sx={{ padding: width<500?'8px 4px 16px':'8px 16px 16px' }}>
                                         <TreningTable trening={trening} setTrening={setTrening} itemS={item} user={user} darkMode={darkMode} />
-                                        {expanded===index&&<TreningCount trening={trening} setTrening={setTrening} api={api} cat={['categories',item]} darkMode={darkMode} user={user} />}
+                                        {expanded===index&&<TreningCount setReady={setReady} trening={trening} setTrening={setTrening} api={api} cat={['categories',item]} darkMode={darkMode} user={user} />}
                                     </AccordionDetails>
                                 </Accordion>
                             </Grow>
@@ -201,7 +204,7 @@ export default function Trening({ treningTrig, user, setUser, api, trening, setT
                     )
                 })}
             </Box>} 
-            {ready&&<TreningCount trening={trening} setTrening={setTrening} api={api} cat={[]} darkMode={darkMode} user={user} />}
+            {ready&&<TreningCount setReady={setReady} trening={trening} setTrening={setTrening} api={api} cat={[]} darkMode={darkMode} user={user} />}
             {alList.visible&&<YorNallert user={user} list={alList} setList={setAlList} />}
         </div>
       );

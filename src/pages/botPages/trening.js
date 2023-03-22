@@ -208,7 +208,7 @@ const Form = ({ api }) => {
                             {(targetEditMode||(trening.categories[cat].target===0)||(!trening.categories[cat].hasOwnProperty('target')))&&<IconButton onClick={()=>
                                 {
                                     setTargetEditMode(false);
-                                    let buf = trening; 
+                                    let buf = {...trening}; 
                                     buf.categories[cat].target=targetEditValue;
                                     setTrening(buf);
                                 }}>
@@ -225,8 +225,8 @@ const Form = ({ api }) => {
                             </IconButton></Box>}
                             {(trening.categories[cat].target>0)&&(trening.categories[cat].onTarget!==0)&&<IconButton sx={{ backgroundColor: darkMode==='dark'?'black':'white', boxShadow: '0 0 10px dimgrey' }} size="large" onClick={()=>
                             {
-                                let buf = trening;
-                                buf.categories[cat].target = 0;
+                                let buf = {...trening};
+                                buf.categories[cat].onTarget = 0;
                                 setTrening(buf);
                             }}>
                                 <RestartAltIcon fontSize="inherit" />
