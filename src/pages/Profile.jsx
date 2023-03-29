@@ -173,10 +173,10 @@ export default function Profile({ user, setRows, setState, data, setData, setUse
                                         const resObj = { ...edit };
                                         resObj[dat.index] = target.value;
                                         setEdit(resObj)}} variant="standard" /> : 
-                                    (dat.index!=='telegram'||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID))))&&<Typography sx={styleText.text} variant={isMobile?"h6":"h5"} gutterBottom>
+                                    (dat.index!=='telegram'||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID!==0))))&&<Typography sx={styleText.text} variant={isMobile?"h6":"h5"} gutterBottom>
                                         {dat.index==='telegram' ? (user.telegram==='' ? user.telegramID : user.telegram) : user[dat.index]}
                                     </Typography>}
-                                {!edit.activate&&((dat.index==='email'&&(user.emailValid))||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID))&&(user.telegramValid)))&&
+                                {!edit.activate&&((dat.index==='email'&&(user.emailValid))||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID!==0))&&(user.telegramValid)))&&
                                     <CheckIcon sx={{ color: green[500]}} />}
                                 {!edit.activate&&((dat.index==='email'&&(!user.emailValid))||(dat.index==='telegram'&&(user[dat.index]!==''||(user.telegramID!==0))&&(!user.telegramValid)))&&
                                     <IconButton component="label" onClick={(event)=>handleValidClick(event, dat.index)}>
