@@ -187,8 +187,8 @@ export default function Registration({ data, setData, state, setState, user, set
                 let sjj = api.sendPost({ 
                     login: data.log, 
                     pass: data.pass, 
-                    first_name: otherData.lastName, 
-                    last_name: otherData.seckondName, 
+                    first_name: otherData.seckondName, 
+                    last_name: otherData.lastName, 
                     name: otherData.name, 
                     email: otherData.email 
                 }, 'reg', '' )
