@@ -48,9 +48,7 @@ export default function NewRowsTab({newRow, setNewRow, setVisibleWindowNewRow, e
         setRows(bbb.data.list);
         let buf = copy (editedLists);
         buf.push(rows.length-1);
-        let buf2 = copy(newRow);
-        buf2.push({ name: '', total: '' });
-        setNewRow(buf2);
+        setNewRow({ name: '', total: '' });
         setEditedLists(buf);
         setLoadingIndex(false);
     }

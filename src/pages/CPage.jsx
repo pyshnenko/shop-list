@@ -84,15 +84,9 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     return buf;
   }
 
-  const arrGen2 = (length) => {
-    let buf = [];
-    for (let i=0; i<length; i++) buf.push({ name: '', total: '', ind: '' });
-    return buf;
-  }
-
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
-  const [ newRow, setNewRow ] = useState(arrGen2(rows.length));
+  const [ newRow, setNewRow ] = useState({ name: '', total: '', ind: '' });
   const [ visibleWindowNewRow, setVisibleWindowNewRow ] = useState(false);
   const [ open, setOpen ] = useState({list: 0, visible: false, text: ''});
   const [ editedLists, setEditedLists ] = useState([]);
@@ -101,6 +95,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const [ getUrl, setGetUrl ] = useState({visible: false, url: ''});
   const [ checkForTotal, setCheckForTotal ] = useState({visible: false, ready: false, data: []});
   const [ sumLists, setSumLists ] = useState([]);
+  const [ expanded, setExpanded ] = useState(-1);
 
   const timer = useRef();
   const trigUnload = useRef(true);  
@@ -174,37 +169,35 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     }
   }
 
-    const addButton = (evt, list) => {
-        if ((newRow[list].name!=='')&&(newRow[list].total!=='')) {
-            let buf = copy(rows);
-            let rTotal = Number(newRow[list].total);
-            let rInd = newRow[list].ind;
-            if (newRow[list].ind===' г') { rTotal = Number(newRow[list].total)/1000; rInd = ' кг' }
-            else if (newRow[list].ind===' мл') { rTotal = Number(newRow[list].total)/1000; rInd = ' л' }
-            let trig = true;
-            buf[list].data.map((row)=>{
-              if (row.name.toLocaleLowerCase()===newRow[list].name.toLocaleLowerCase()) {
-                trig=false; 
-                if (row.ind===' мл') { row.ind = ' л'; row.total/=1000+rTotal}
-                else if (row.ind===' г') { row.ind = ' кг'; row.total/=1000+rTotal}
-                else { row.ind = rInd; row.total+=rTotal }
-              }
-            })
-            if (trig) buf[list].data.push({name: newRow[list].name, total: rTotal, ind: rInd, del: 0, selected: false});
-            setRows(buf);
-            let buf2 = copy(newRow);
-            buf2[list]={name: '', total: '', ind: '' }
-            setNewRow(buf2);
-            let bPage = copy(page);
-            bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
-            setPage(bPage);
-            if (!editedLists.includes(list)) {
-                buf = copy (editedLists);
-                buf.push(list);
-                setEditedLists(buf);
-            }
+  const addButton = (evt, list) => {
+    if ((newRow.name!=='')&&(newRow.total!=='')) {
+      let buf = copy(rows);
+      let rTotal = Number(newRow.total);
+      let rInd = newRow.ind;
+      if (newRow.ind===' г') { rTotal = Number(newRow.total)/1000; rInd = ' кг' }
+      else if (newRow.ind===' мл') { rTotal = Number(newRow.total)/1000; rInd = ' л' }
+      let trig = true;
+      buf[list].data.map((row)=>{
+        if (row.name.toLocaleLowerCase()===newRow.name.toLocaleLowerCase()) {
+          trig=false; 
+          if (row.ind===' мл') { row.ind = ' л'; row.total/=1000+rTotal}
+          else if (row.ind===' г') { row.ind = ' кг'; row.total/=1000+rTotal}
+          else { row.ind = rInd; row.total+=rTotal }
         }
+      })
+      if (trig) buf[list].data.push({name: newRow.name, total: rTotal, ind: rInd, del: 0, selected: false});
+      setRows(buf);
+      setNewRow({ name: '', total: '', ind: '' });
+      let bPage = copy(page);
+      bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
+      setPage(bPage);
+      if (!editedLists.includes(list)) {
+        buf = copy (editedLists);
+        buf.push(list);
+        setEditedLists(buf);
+      }
     }
+  }
 
   const handleListEdit = (evt, list) => {
     setOpen({ list: list, visible: true, text: '' });
@@ -256,6 +249,11 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     setCheckForTotal(buf);
   }
 
+  const handleChange = (list) => (evt, dat) => {
+    setExpanded(dat ? list : -1);
+    setNewRow({ name: '', total: '', ind: '' });
+  }
+
   return (
     <div>
       {getUrl.visible&&<GeneratingUrl user={user} getUrl={getUrl} setGetUrl={setGetUrl} />}
@@ -263,141 +261,143 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       {open.visible&&<DWindow editedLists={editedLists} setEditedLists={setEditedLists} open={open} setOpen={setOpen} rows={rows} setRows={setRows} user={user} />}
       {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
       {rows.map((data, list)=>{ return (
-      <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={data.name+list}><Accordion sx={{ boxShadow: 3 }} key={data.name+list}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header"
-          key={data.name+list}
-          sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
-        >
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
-            {checkForTotal.visible&&<Checkbox checked={checkForTotal.data.includes(data.id)} onClick={(event)=>handleCheckForTotal(list)} sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, margin: 0, padding: 0 }} />}
-            <Typography>{`${data.name} - `}</Typography>
-            <Typography>{`${data.author} - `}</Typography>
-            <Typography>{`ID: ${data.id}`}</Typography>
-          </Box>
-          {user.settings.edit&&<Box sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
-            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleShare(event, list)}><ShareIcon /></Button>
-            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
-            <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></Button>
-          </Box>}
-        </AccordionSummary>
-        <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
-          <Box sx={{ margin: (isMobile)?0:'10px', boxShadow: 3 }}>
-            <Paper sx={{ width: '100%', mb: 2 }}>
-              <TableContainer>
-                <Table
-                  aria-labelledby="tableTitle"
-                  size={'small'}
-                  sx={{ boxShadow: 3 }}
-                >
-                  <EnhancedTableHead />
-                  <TableBody>
-                    {rows[list].data
-                      .slice(page[list] * rowsPerPage, page[list] * rowsPerPage + rowsPerPage)
-                      .map((row, index) => {
-                        const isItemSelected = row.selected;
-                        const labelId = `enhanced-table-checkbox-${index}`;
-
-                        return (
-                          <TableRow
-                            hover
-                            role="checkbox"
-                            aria-checked={isItemSelected}
-                            tabIndex={-1}
-                            key={row.name+index}
-                            selected={isItemSelected}
-                          >
-                            <TableCell padding="checkbox">
-                              <Checkbox
-                                sx = {{ zoom: 1.3 }}
-                                color="primary"
-                                checked={isItemSelected}
-                                onClick={(event) => handleClick(event, list, index)}
-                              />
-                            </TableCell>
-                            <TableCell
-                              component="th"
-                              id={labelId}
-                              scope="row"
-                              padding="none"
-                              sx = {{ textDecoration: row.selected ? 'line-through' : 'none' }}
-                            >
-                              {row.name}
-                            </TableCell>
-                            <TableCell align="right">{
-                              (row.ind===' л'&&row.total<1) ? 
-                                (row.total*1000+' мл') : 
-                                (row.ind===' кг'&&row.total<1) ? 
-                                  (row.total*1000+' г') : row.total + (row.ind||'')
-                            }</TableCell>
-                            <TableCell align="right">
-                              <IconButton onClick={(event) => handleDelClick(event, list, index)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                sx={{ padding: 0 }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                component="div"
-                count={rows[list].data.length}
-                rowsPerPage={rowsPerPage}
-                labelRowsPerPage={'Строк'}
-                labelDisplayedRows={({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage-0.0001)+1}`}}
-                page={(page[list] ? page[list] : 0)}
-                onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
-                onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
-              />
-              <Box sx={{ display: 'flex'}}>          
-                <TextField sx={{ margin: 1 }} label="Название" variant="standard" value={newRow[list].name} onChange={({ target }) => {
-                      const resObj = copy(newRow);
-                      resObj[list].name = target.value;
-                      setNewRow(resObj)}} />
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <TextField sx={{ margin: 1 }} label="Количество" variant="standard" value={newRow[list].total} onChange={({ target }) => {
-                        const resObj = copy(newRow);
-                        let num = Number(target.value);
-                        if (num) {
-                          resObj[list].total = num;
-                          setNewRow(resObj)}
-                        else if (target.value[target.value.length-1]===','||target.value[target.value.length-1]==='.') {
-                          resObj[list].total = target.value;
-                          setNewRow(resObj);
-                      }}} />
-                  <FormControl variant="standard" sx={{ minWidth: 40, marginRight: '20px' }}>
-                    <Select
-                      sx={{ paddingTop: '20px'}}
-                      value={newRow[list].ind}
-                      onChange={({target})=>{
-                        const resObj = copy(newRow);
-                        resObj[list].ind = target.value;
-                        setNewRow(resObj)
-                      }}
-                    >
-                      <MenuItem value=""> </MenuItem>
-                      <MenuItem value={' кг'}>кг</MenuItem>
-                      <MenuItem value={' г'}>г</MenuItem>
-                      <MenuItem value={' л'}>л</MenuItem>
-                      <MenuItem value={' мл'}>мл</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
+        <Grow in={true} timeout={1000 * list} appear={user.settings.grow} key={data.name+list}>
+          <Accordion sx={{ boxShadow: 3 }} key={data.name+list} expanded={expanded===list} onChange={handleChange(list)} >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+              key={data.name+list}
+              sx={{ display: 'flex', justifyContent: 'center', padding: (checkForTotal.visible?'0 6px':'0 16px') }}
+            >
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+                {checkForTotal.visible&&<Checkbox checked={checkForTotal.data.includes(data.id)} onClick={(event)=>handleCheckForTotal(list)} sx={{ '& .MuiSvgIcon-root': { fontSize: 28 }, margin: 0, padding: 0 }} />}
+                <Typography>{`${data.name} - `}</Typography>
+                <Typography>{`${data.author} - `}</Typography>
+                <Typography>{`ID: ${data.id}`}</Typography>
               </Box>
-              <Button
-                onClick={(event)=>addButton(event, list)}>
-                Добавить
-              </Button>
-            </Paper>
-          </Box>
-        </AccordionDetails>    
-      </Accordion></Grow>
+              {user.settings.edit&&<Box sx={{ margin: 0, padding: 0, display: 'flex', flexWrap: 'nowrap'}}>
+                <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleShare(event, list)}><ShareIcon /></Button>
+                <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListEdit(event, list)}><ModeEditOutlineOutlinedIcon /></Button>
+                <Button sx={{ padding: 0, margin: 0, minWidth: width<400?'35px':'50px' }} onClick={(event)=>handleListDeleteBefore(event, list)}><ClearOutlinedIcon /></Button>
+              </Box>}
+            </AccordionSummary>
+            <AccordionDetails sx={{ boxShadow: 3, padding: (isMobile) ? 0 : '8px 16px 16px' }}>
+              <Box sx={{ margin: (isMobile)?0:'10px', boxShadow: 3 }}>
+                <Paper sx={{ width: '100%', mb: 2 }}>
+                  <TableContainer>
+                    <Table
+                      aria-labelledby="tableTitle"
+                      size={'small'}
+                      sx={{ boxShadow: 3 }}
+                    >
+                      <EnhancedTableHead />
+                      <TableBody>
+                        {rows[list].data
+                          .slice(page[list] * rowsPerPage, page[list] * rowsPerPage + rowsPerPage)
+                          .map((row, index) => {
+                            const isItemSelected = row.selected;
+                            const labelId = `enhanced-table-checkbox-${index}`;
+
+                            return (
+                              <TableRow
+                                hover
+                                role="checkbox"
+                                aria-checked={isItemSelected}
+                                tabIndex={-1}
+                                key={row.name+index}
+                                selected={isItemSelected}
+                              >
+                                <TableCell padding="checkbox">
+                                  <Checkbox
+                                    sx = {{ zoom: 1.3 }}
+                                    color="primary"
+                                    checked={isItemSelected}
+                                    onClick={(event) => handleClick(event, list, index)}
+                                  />
+                                </TableCell>
+                                <TableCell
+                                  component="th"
+                                  id={labelId}
+                                  scope="row"
+                                  padding="none"
+                                  sx = {{ textDecoration: row.selected ? 'line-through' : 'none' }}
+                                >
+                                  {row.name}
+                                </TableCell>
+                                <TableCell align="right">{
+                                  (row.ind===' л'&&row.total<1) ? 
+                                    (row.total*1000+' мл') : 
+                                    (row.ind===' кг'&&row.total<1) ? 
+                                      (row.total*1000+' г') : row.total + (row.ind||'')
+                                }</TableCell>
+                                <TableCell align="right">
+                                  <IconButton onClick={(event) => handleDelClick(event, list, index)}>
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  <TablePagination
+                    sx={{ padding: 0 }}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    component="div"
+                    count={rows[list].data.length}
+                    rowsPerPage={rowsPerPage}
+                    labelRowsPerPage={'Строк'}
+                    labelDisplayedRows={({ from, to, count, page }) => {return`${page+1} из ${Math.floor(count/rowsPerPage-0.0001)+1}`}}
+                    page={(page[list] ? page[list] : 0)}
+                    onPageChange={(event, newPage)=>handleChangePage(event, newPage, list)}
+                    onRowsPerPageChange={(event, list)=>handleChangeRowsPerPage(event, list)}
+                  />
+                  <Box sx={{ display: 'flex', justifyContent: 'center'}}>
+                    <TextField sx={{ margin: 1 }} label="Название" variant="standard" value={newRow.name} onChange={({ target }) => {
+                          const resObj = {...newRow};
+                          resObj.name = target.value;
+                          setNewRow(resObj)}} />
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <TextField sx={{ margin: 1 }} label="Количество" variant="standard" value={newRow.total} onChange={({ target }) => {
+                            const resObj = {...newRow};
+                            let num = Number(target.value);
+                            if (num) {
+                              resObj.total = num;
+                              setNewRow(resObj)}
+                            else if (target.value[target.value.length-1]===','||target.value[target.value.length-1]==='.') {
+                              resObj.total = target.value;
+                              setNewRow(resObj);
+                          }}} />
+                      <FormControl variant="standard" sx={{ minWidth: 40, marginRight: '20px' }}>
+                        <Select
+                          sx={{ paddingTop: '20px'}}
+                          value={newRow.ind}
+                          onChange={({target})=>{
+                            const resObj = {...newRow};
+                            resObj.ind = target.value;
+                            setNewRow(resObj)
+                          }}
+                        >
+                          <MenuItem value=""> </MenuItem>
+                          <MenuItem value={' кг'}>кг</MenuItem>
+                          <MenuItem value={' г'}>г</MenuItem>
+                          <MenuItem value={' л'}>л</MenuItem>
+                          <MenuItem value={' мл'}>мл</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </Box>
+                  <Button
+                    onClick={(event)=>addButton(event, list)}>
+                    Добавить
+                  </Button>
+                </Paper>
+              </Box>
+            </AccordionDetails>    
+          </Accordion>
+        </Grow>
       )})}
       {user.hasOwnProperty('sumLists')&&(user?.sumLists.length!==0)&&<SumListsGenerator setGetUrl={setGetUrl} rows={rows} setRows={setRows} api={api} user={user} checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} openDelW={openDelW} setOpenDelW={setOpenDelW} sumLists={sumLists} setSumLists={setSumLists} />}
       <DButton checkForTotal={checkForTotal} setCheckForTotal={setCheckForTotal} trigUnload={trigUnload} timer={timer} api={api} rows={rows} user={user} setUser={setUser} setVisibleWindowNewRow={setVisibleWindowNewRow} editedLists={editedLists} setEditedLists={setEditedLists} />

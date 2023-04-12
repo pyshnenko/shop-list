@@ -96,7 +96,6 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
             setLoadingIndex(true);
             let lists = api.sendPost({}, 'sumLists', `Bearer ${user.token}`);
             lists.then((res)=>{
-                console.log(res)
                 if (res.status===200)
                     setSumLists(res.data.sumLists)
                 else setSumLists([]);
