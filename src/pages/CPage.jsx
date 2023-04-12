@@ -35,6 +35,13 @@ import ShareIcon from '@mui/icons-material/Share';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 
+import { io } from 'socket.io-client';
+
+const URL ='https://io.spamigor.site';
+const socket = io(URL, {
+  autoConnect: true
+});
+
 const headCells = [
   {
     id: 'name',
@@ -104,8 +111,46 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     const handleResize = (event) => {
       setWidth(event.target.innerWidth);
     };
+
     window.addEventListener('resize', handleResize);
+
+    function onConnect() {
+      console.log('connect')
+    }
+
+    function onDisconnect() {
+      console.log('disconnect')
+    }
+
+    function onEdit(value) {
+      let buf = JSON.parse(value);
+      if (rows.length) {
+        for (let i=0; i<rows.length; i++) {
+          if (rows[i].id===buf.id) {
+            let inpBuf = copy(rows);
+            inpBuf[i] = buf;
+            setRows(inpBuf);
+            break;
+          }
+        }
+      }
+      else rows.push(buf);
+    }
+
+    function statUpd() {
+      socket.emit('hi', expanded>=0 ? rows[expanded].id : 0);
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('edit', onEdit);
+    socket.on('upd', statUpd);
+
     return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('edit', onEdit);
+      socket.off('upd', statUpd);
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -133,6 +178,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         buf.push(list);
         setEditedLists(buf);
     }
+    socket.emit('edit', JSON.stringify(buf[list]));
   };
 
   const handleChangePage = (event, newPage, list) => {
@@ -167,6 +213,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         buf1.push(list);
         setEditedLists(buf1);
     }
+    socket.emit('edit', JSON.stringify(rows[list]));
   }
 
   const addButton = (evt, list) => {
@@ -196,6 +243,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         buf.push(list);
         setEditedLists(buf);
       }
+      socket.emit('edit', JSON.stringify(rows[list]));
     }
   }
 
@@ -252,6 +300,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const handleChange = (list) => (evt, dat) => {
     setExpanded(dat ? list : -1);
     setNewRow({ name: '', total: '', ind: '' });
+    socket.emit(dat ? 'hi' : 'bye', rows[list].id);
   }
 
   return (
