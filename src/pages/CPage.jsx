@@ -38,9 +38,6 @@ import Select from '@mui/material/Select';
 import { io } from 'socket.io-client';
 
 const URL ='https://io.spamigor.site';
-const socket = io(URL, {
-  autoConnect: true
-});
 
 const headCells = [
   {
@@ -90,6 +87,8 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     for (let i=0; i<length; i++) buf.push(0);
     return buf;
   }
+  
+  const socket  = useRef(null);
 
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
@@ -113,6 +112,10 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     };
 
     window.addEventListener('resize', handleResize);
+
+    socket.current = io(URL, {
+      autoConnect: true
+    });
 
     function onConnect() {
       console.log('connect')
@@ -138,19 +141,19 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     }
 
     function statUpd() {
-      socket.emit('hi', expanded>=0 ? rows[expanded].id : 0);
+      socket.current.emit('hi', expanded>=0 ? rows[expanded].id : 0);
     }
 
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-    socket.on('edit', onEdit);
-    socket.on('upd', statUpd);
+    socket.current.on('connect', onConnect);
+    socket.current.on('disconnect', onDisconnect);
+    socket.current.on('edit', onEdit);
+    socket.current.on('upd', statUpd);
 
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-      socket.off('edit', onEdit);
-      socket.off('upd', statUpd);
+      socket.current.off('connect', onConnect);
+      socket.current.off('disconnect', onDisconnect);
+      socket.current.off('edit', onEdit);
+      socket.current.off('upd', statUpd);
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -173,12 +176,12 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     let buf = copy(rows);
     buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
     setRows(buf);
+    socket.current.emit('edit', JSON.stringify(buf[list]));
     if (!editedLists.includes(list)) {
         buf = copy(editedLists);
         buf.push(list);
         setEditedLists(buf);
     }
-    socket.emit('edit', JSON.stringify(buf[list]));
   };
 
   const handleChangePage = (event, newPage, list) => {
@@ -205,6 +208,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     setRows()
     buf[list].data.splice(index, 1);
     setRows(buf);
+    socket.current.emit('edit', JSON.stringify(buf[list]));
     let pp = Math.trunc((buf[list].data.length/rowsPerPage)-0.001);
     bpage[list]=(p<pp ? p : pp)
     setPage(bpage);
@@ -213,7 +217,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         buf1.push(list);
         setEditedLists(buf1);
     }
-    socket.emit('edit', JSON.stringify(rows[list]));
   }
 
   const addButton = (evt, list) => {
@@ -234,6 +237,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       })
       if (trig) buf[list].data.push({name: newRow.name, total: rTotal, ind: rInd, del: 0, selected: false});
       setRows(buf);
+      socket.current.emit('edit', JSON.stringify(buf[list]));
       setNewRow({ name: '', total: '', ind: '' });
       let bPage = copy(page);
       bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
@@ -243,7 +247,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
         buf.push(list);
         setEditedLists(buf);
       }
-      socket.emit('edit', JSON.stringify(rows[list]));
     }
   }
 
@@ -300,7 +303,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const handleChange = (list) => (evt, dat) => {
     setExpanded(dat ? list : -1);
     setNewRow({ name: '', total: '', ind: '' });
-    socket.emit(dat ? 'hi' : 'bye', rows[list].id);
+    socket.current.emit(dat ? 'hi' : 'bye', rows[list].id);
   }
 
   return (
