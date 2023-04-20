@@ -34,6 +34,7 @@ import FormControl from '@mui/material/FormControl';
 import ShareIcon from '@mui/icons-material/Share';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import {useSocketIO} from "../src/hooks/useSocketIO";
 
 import { io } from 'socket.io-client';
 
@@ -87,8 +88,6 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     for (let i=0; i<length; i++) buf.push(0);
     return buf;
   }
-  
-  const socket  = useRef(null);
 
   const [ page, setPage ] = useState(arrGen(rows.length));
   const [ rowsPerPage, setRowsPerPage ] = useState(5);
@@ -102,18 +101,22 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const [ checkForTotal, setCheckForTotal ] = useState({visible: false, ready: false, data: []});
   const [ sumLists, setSumLists ] = useState([]);
   const [ expanded, setExpanded ] = useState(-1);
+  const {socket} = useSocketIO({rows, setRows});
+  
+  //const socket  = useRef(null);
 
   const timer = useRef();
   const trigUnload = useRef(true);  
 
   useEffect(() => {
+
     const handleResize = (event) => {
       setWidth(event.target.innerWidth);
     };
 
     window.addEventListener('resize', handleResize);
 
-    socket.current = io(URL, {
+    /*socket.current = io(URL, {
       autoConnect: true
     });
 
@@ -147,13 +150,13 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     socket.current.on('connect', onConnect);
     socket.current.on('disconnect', onDisconnect);
     socket.current.on('edit', onEdit);
-    socket.current.on('upd', statUpd);
+    socket.current.on('upd', statUpd);*/
 
     return () => {
-      socket.current.off('connect', onConnect);
+      /*socket.current.off('connect', onConnect);
       socket.current.off('disconnect', onDisconnect);
       socket.current.off('edit', onEdit);
-      socket.current.off('upd', statUpd);
+      socket.current.off('upd', statUpd);*/
       window.removeEventListener('resize', handleResize);
     };
   }, []);
@@ -176,7 +179,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     let buf = copy(rows);
     buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
     setRows(buf);
-    socket.current.emit('edit', JSON.stringify(buf[list]));
+    socket.emit('edit', JSON.stringify(buf[list]));
     if (!editedLists.includes(list)) {
         buf = copy(editedLists);
         buf.push(list);
@@ -208,7 +211,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
     setRows()
     buf[list].data.splice(index, 1);
     setRows(buf);
-    socket.current.emit('edit', JSON.stringify(buf[list]));
+    socket.emit('edit', JSON.stringify(buf[list]));
     let pp = Math.trunc((buf[list].data.length/rowsPerPage)-0.001);
     bpage[list]=(p<pp ? p : pp)
     setPage(bpage);
@@ -237,7 +240,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
       })
       if (trig) buf[list].data.push({name: newRow.name, total: rTotal, ind: rInd, del: 0, selected: false});
       setRows(buf);
-      socket.current.emit('edit', JSON.stringify(buf[list]));
+      socket.emit('edit', JSON.stringify(buf[list]));
       setNewRow({ name: '', total: '', ind: '' });
       let bPage = copy(page);
       bPage[list] = Math.trunc((rows[list].data.length/rowsPerPage));
@@ -303,7 +306,7 @@ export default function PlaygroundSpeedDial({ rows, setRows, api, user, setUser 
   const handleChange = (list) => (evt, dat) => {
     setExpanded(dat ? list : -1);
     setNewRow({ name: '', total: '', ind: '' });
-    socket.current.emit(dat ? 'hi' : 'bye', rows[list].id);
+    socket.emit(dat ? 'hi' : 'bye', rows[list].id);
   }
 
   return (
