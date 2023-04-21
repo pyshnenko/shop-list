@@ -3,7 +3,7 @@ import copy from 'fast-copy';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import { blue, blueGrey, green } from '@mui/material/colors';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,12 +15,18 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import { getInfoMessage, setLoadingIndex } from '../helpers/leftInfoWindow';
 import Grow from '@mui/material/Grow';
+import {useSocketIO} from "../src/hooks/useSocketIO";
 
 export default function UnLoginAdm({ state, setState, unRows, setUnRows, api }) {
 
     const [ bdata, setBData ] = useState({error: unRows.error, textError: unRows.textError});
-    const [ rows, setRows ] = useState(unRows.data.data);
-    console.log('aaaaaaaaaaaaaaaa')
+    const [ rows, setRows ] = useState(unRows.data.data);    
+    const { sendIO } = useSocketIO({ unLogin: true, unLoginSum: unRows.data.hasOwnProperty('saved'), rows, setRows });
+
+    useEffect(()=>{
+        sendIO(unRows.data.hasOwnProperty('saved')?'hiSum':'hi', unRows.data.id)
+    },[])
+
     const styleBox = {
         borderRadius: '50px',
         boxShadow: 3,
@@ -44,7 +50,11 @@ export default function UnLoginAdm({ state, setState, unRows, setUnRows, api }) 
     const handleClick = (evt, ind) => {
         let buf = copy(rows);
         buf[ind].selected=!buf[ind].selected;
-        setRows(buf)
+        setRows(buf);
+        console.log(buf);
+        let ioBuf = {...unRows.data};
+        ioBuf.data = buf;
+        sendIO(unRows.data.hasOwnProperty('saved')?'editSum':'edit', JSON.stringify(ioBuf));
     }
 
     const saveButton = async (evt) => {
@@ -62,7 +72,6 @@ export default function UnLoginAdm({ state, setState, unRows, setUnRows, api }) 
 
   return (
     <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly' }}>
-        {console.log('unlgn')}
         <Grow in={true}><Box component={Paper}
             sx={styleBox}>
             {!bdata.error&&<TableContainer sx={{ margin: '10px' }} component={Paper}>

@@ -21,6 +21,7 @@ import background from './back3.jpeg';
 import sendApi from './mech/api';
 import React, { useState, useEffect, useRef } from 'react';
 import {useTelegram} from "./src/hooks/useTelegram";
+import {useSocketIO} from "./src/hooks/useSocketIO";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import {isMobile} from 'react-device-detect';
@@ -34,7 +35,7 @@ function App(props)  {
   const {onToggleButton, tg} = useTelegram();  
   const [ form, setForm ] = useState(false);  
   const [ tren, setTren ] = useState(false);
-  const trigger3 = useRef(true);
+  const trigger3 = useRef(true);  
 
   useEffect(() => {
       tg.ready();
@@ -89,7 +90,8 @@ function Appaa(props) {
   const [ darkMode, setDarkMode ] = useState(
     (!localStorage?.shopListColorMode||localStorage?.shopListColorMode==='auto') ? 
       (window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light') :
-      localStorage.shopListColorMode)
+      localStorage.shopListColorMode);
+  useSocketIO({ rows, setRows, state });
 
   const trigger = useRef(true);
   const trigger2 = useRef(true);
@@ -198,8 +200,7 @@ function Appaa(props) {
                 backgroundImage: user?.settings?.animation===3?`url(${background})`:'none',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                backgroundSize: 'cover',
-                height: '100em'
+                backgroundSize: 'cover'
               }}>
               {start&&<div style={{ zIndex: 7, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 {(!state.login)&&(state.state==='')&&<Login setRows = {setRows} data = {data} setData={setData} state={state} setState={setState} user={user} setUser={setUser} api={api} setSerials={setSerials} setTrening={setTrening} /> }

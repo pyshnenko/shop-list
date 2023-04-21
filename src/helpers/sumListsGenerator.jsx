@@ -24,6 +24,7 @@ import {isMobile} from 'react-device-detect';
 import DelWindow from '../helpers/deleteDialog';
 import ShareIcon from '@mui/icons-material/Share';
 import SaveIcon from '@mui/icons-material/Save';
+import { useSocketIO } from "../src/hooks/useSocketIO";
 
 const headCells = [
     {
@@ -76,7 +77,9 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
 
     const [ page, setPage ] = useState(arrGen(sumLists.length));
     const [ rowsPerPage, setRowsPerPage ] = useState(10);
-    const [ width, setWidth ] = useState(window.innerWidth);
+    const [ width, setWidth ] = useState(window.innerWidth);    
+    const [ sumExpanded, setSumExpanded ] = useState(-1);
+    const { sendIO } = useSocketIO({ sumExpanded, setSumExpanded });
 
     let triggerSumlists = useRef(true);
 
@@ -184,10 +187,11 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
     }
 
     const handleClick = (event, list, index) => {
-        console.log('click')
         const rIndex = index + ((page[list]||0) * rowsPerPage);
         let buf = copy(sumLists);
         buf[list].data[rIndex].selected = buf[list].data[rIndex].selected ? false : true;
+        sendIO('editSum', JSON.stringify(buf[list]));
+        console.log('click')
         let bufR = copy(rows);
         sumLists[list].lists.num.map((row)=>{
             bufR.map((rowI)=>{
@@ -264,11 +268,17 @@ export default function SumListsGenerator({ setGetUrl, rows, setRows, api, user,
         })
     }
 
+    const handleChangeOpen = (list) => (evt, dat) => {
+        setSumExpanded(dat ? list : -1);
+        sendIO(dat ? 'hiSum' : 'byeSum', sumLists[list].id);
+    }
+
     return (
         <Box sx={{ marginTop: 5 }}>
             {openDelW.visible&&<DelWindow openDelW={openDelW} setOpenDelW={setOpenDelW} />}
             {sumLists.map((data, list)=>{ return (
-                <Grow in={true} timeout={1000 * (list+rows.length)} appear={user.settings.grow} key={list}><Accordion sx={{ boxShadow: 3 }} key={list}>
+                <Grow in={true} timeout={1000 * (list+rows.length)} appear={user.settings.grow} key={list}>
+                    <Accordion sx={{ boxShadow: 3 }} key={list} expanded={sumExpanded===list} onChange={handleChangeOpen(list)}>
                     <AccordionSummary
                         expandIcon={<ExpandMoreIcon />}
                         key={list}
