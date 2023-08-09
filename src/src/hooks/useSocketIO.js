@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import copy from 'fast-copy';
 
 let socket;
-const URL ='https://io.spamigor.site';    
+const URL ='https://io.spamigor.ru';    
 let connect = false;
 let state, rows, setRows, sumLists, setSumLists, expanded, setExpanded, sumExpanded, setSumExpanded, unLogin = false, unLoginSum = false;
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-let baseURL = "http://45.89.66.91:8765/api";
+let baseURL = "https://spamigor.ru:8765/api";
 
 export default class sendApi {
     constructor(uri) {
