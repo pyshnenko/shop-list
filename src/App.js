@@ -29,7 +29,7 @@ import {Route, Routes, BrowserRouter as Router} from 'react-router-dom';
 import Form from './pages/botPages/form';
 import Trening from './pages/botPages/trening';
 
-const api = new sendApi ('https://spamigor.site/api');
+const api = new sendApi ('https://spamigor.ru/api');
 
 function App(props)  {
   const {onToggleButton, tg} = useTelegram();  
